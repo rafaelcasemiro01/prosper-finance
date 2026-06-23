@@ -1,4 +1,4 @@
-import { Sidebar } from '@/components/Sidebar';
+import { AppShell } from '@/components/AppShell';
 import { Card, Eyebrow, ProgressBar } from '@/components/ui';
 import {
   getProfile, getBalanceTotal, getMonthSummary, getGoals, getTransactions,
@@ -23,107 +23,101 @@ export default async function DashboardPage() {
   const firstName = (profile?.full_name || 'você').split(' ')[0];
 
   return (
-    <div style={{ display: 'flex', background: 'var(--bg)', minHeight: '100vh' }}>
-      <Sidebar active="/dashboard" />
+    <AppShell active="/dashboard" width="wide">
+      <Eyebrow>Boa noite</Eyebrow>
+      <h1 className="h-page" style={{ margin: '6px 0 28px' }}>Olá, {firstName}</h1>
 
-      <main style={{ flex: 1, padding: '40px 48px', maxWidth: 1400 }}>
-        <Eyebrow>Boa noite</Eyebrow>
-        <h1 style={{ fontSize: 44, margin: '6px 0 32px', fontWeight: 700, letterSpacing: '-0.02em' }}>
-          Olá, {firstName}
-        </h1>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16, marginBottom: 16 }}>
-          {/* Hero balance */}
+      <div className="grid grid-hero" style={{ marginBottom: 16 }}>
+        {/* Hero balance */}
+        <div
+          style={{
+            background: 'linear-gradient(150deg, var(--ink) 0%, color-mix(in oklab, var(--ink) 86%, var(--accent)) 100%)',
+            color: 'var(--bg)', borderRadius: 'var(--radius-xl)', padding: 'clamp(24px, 4vw, 36px)',
+            minHeight: 200, boxShadow: 'var(--shadow-2)', position: 'relative', overflow: 'hidden',
+          }}
+        >
+          <Eyebrow style={{ color: 'var(--ink-3)' }}>Patrimônio total · BRL</Eyebrow>
+          <div className="tnum" style={{ fontSize: 'clamp(40px, 8vw, 64px)', fontWeight: 700, marginTop: 14, letterSpacing: '-0.03em', lineHeight: 1 }}>
+            {brl(total)}
+          </div>
           <div
             style={{
-              background: 'linear-gradient(150deg, var(--ink) 0%, color-mix(in oklab, var(--ink) 86%, var(--accent)) 100%)',
-              color: 'var(--bg)', borderRadius: 'var(--radius-xl)', padding: 36,
-              minHeight: 220, boxShadow: 'var(--shadow-2)', position: 'relative', overflow: 'hidden',
+              marginTop: 24, paddingTop: 18, display: 'flex', gap: 24, flexWrap: 'wrap',
+              borderTop: '1px solid color-mix(in oklab, var(--bg) 16%, transparent)',
             }}
           >
-            <Eyebrow style={{ color: 'var(--ink-3)' }}>Patrimônio total · BRL</Eyebrow>
-            <div className="tnum" style={{ fontSize: 64, fontWeight: 700, marginTop: 16, letterSpacing: '-0.03em' }}>
-              {brl(total)}
-            </div>
-            <div
-              style={{
-                marginTop: 28, paddingTop: 18, display: 'flex', gap: 28,
-                borderTop: '1px solid color-mix(in oklab, var(--bg) 16%, transparent)',
-              }}
-            >
-              <Stat label="Disponível" value={brl(available)} />
-              <Stat label="Investido" value={brl(profile?.invested ?? 0)} />
-              <Stat label="Saldo do mês" value={brl(month.net, { sign: true })} />
-            </div>
-          </div>
-
-          {/* Income / expense */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <Card style={{ flex: 1 }}>
-              <Eyebrow style={{ color: 'var(--positive)' }}>Receitas · mês</Eyebrow>
-              <div style={{ fontSize: 34, fontWeight: 700, marginTop: 8 }}>{brl(month.income)}</div>
-            </Card>
-            <Card style={{ flex: 1 }}>
-              <Eyebrow style={{ color: 'var(--negative)' }}>Despesas · mês</Eyebrow>
-              <div style={{ fontSize: 34, fontWeight: 700, marginTop: 8 }}>{brl(month.expense)}</div>
-            </Card>
+            <Stat label="Disponível" value={brl(available)} />
+            <Stat label="Investido" value={brl(profile?.invested ?? 0)} />
+            <Stat label="Saldo do mês" value={brl(month.net, { sign: true })} />
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 16 }}>
-          {/* Featured goal */}
-          <Card>
-            <Eyebrow>Meta destacada</Eyebrow>
-            <div style={{ fontSize: 24, fontWeight: 700, marginTop: 8 }}>{featured?.name ?? 'Crie sua meta'}</div>
-            <div style={{ fontSize: 56, fontWeight: 700, color: 'var(--accent)', marginTop: 16 }}>
-              {Math.round(goalPct)}%
-            </div>
-            <div style={{ marginTop: 12 }}>
-              <ProgressBar pct={goalPct} />
-            </div>
-            {featured && (
-              <div style={{ marginTop: 12, fontSize: 12, color: 'var(--ink-2)' }}>
-                {brl(featured.current)} de {brl(featured.target)}
-              </div>
-            )}
+        {/* Income / expense */}
+        <div className="grid" style={{ gridAutoRows: '1fr', gap: 16 }}>
+          <Card className="card--hover">
+            <Eyebrow style={{ color: 'var(--positive)' }}>Receitas · mês</Eyebrow>
+            <div className="tnum" style={{ fontSize: 'clamp(28px,5vw,34px)', fontWeight: 700, marginTop: 8 }}>{brl(month.income)}</div>
           </Card>
+          <Card className="card--hover">
+            <Eyebrow style={{ color: 'var(--negative)' }}>Despesas · mês</Eyebrow>
+            <div className="tnum" style={{ fontSize: 'clamp(28px,5vw,34px)', fontWeight: 700, marginTop: 8 }}>{brl(month.expense)}</div>
+          </Card>
+        </div>
+      </div>
 
-          {/* Recent transactions */}
-          <Card>
-            <Eyebrow>Movimentos recentes</Eyebrow>
-            <div style={{ marginTop: 10 }}>
-              {recent.map((t) => {
-                const inc = t.amount > 0;
-                return (
-                  <div
-                    key={t.id}
-                    style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: '12px 0', borderBottom: '1px solid var(--line-soft)',
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: 14, fontWeight: 500 }}>{t.name}</div>
-                      <div style={{ fontSize: 12, color: 'var(--ink-3)' }}>
-                        {CATEGORIES[t.category]?.name ?? t.category} · {t.occurred_on}
-                      </div>
-                    </div>
-                    <div className="tnum" style={{ fontSize: 14, fontWeight: 600, color: inc ? 'var(--positive)' : 'var(--ink)' }}>
-                      {inc ? '+' : '−'}{brl(Math.abs(t.amount)).replace('−', '')}
+      <div className="grid grid-split">
+        {/* Featured goal */}
+        <Card className="card--hover">
+          <Eyebrow>Meta destacada</Eyebrow>
+          <div style={{ fontSize: 22, fontWeight: 700, marginTop: 8 }}>{featured?.name ?? 'Crie sua meta'}</div>
+          <div style={{ fontSize: 52, fontWeight: 700, color: 'var(--accent)', marginTop: 14, lineHeight: 1 }}>
+            {Math.round(goalPct)}%
+          </div>
+          <div style={{ marginTop: 14 }}>
+            <ProgressBar pct={goalPct} />
+          </div>
+          {featured && (
+            <div style={{ marginTop: 12, fontSize: 12, color: 'var(--ink-2)' }}>
+              {brl(featured.current)} de {brl(featured.target)}
+            </div>
+          )}
+        </Card>
+
+        {/* Recent transactions */}
+        <Card>
+          <Eyebrow>Movimentos recentes</Eyebrow>
+          <div style={{ marginTop: 10 }}>
+            {recent.map((t) => {
+              const inc = t.amount > 0;
+              return (
+                <div
+                  key={t.id}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+                    padding: '12px 0', borderBottom: '1px solid var(--line-soft)',
+                  }}
+                >
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 14, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.name}</div>
+                    <div style={{ fontSize: 12, color: 'var(--ink-3)' }}>
+                      {CATEGORIES[t.category]?.name ?? t.category} · {t.occurred_on}
                     </div>
                   </div>
-                );
-              })}
-              {recent.length === 0 && (
-                <div style={{ padding: '24px 0', color: 'var(--ink-3)', fontSize: 13 }}>
-                  Nenhum movimento ainda. Lance sua primeira receita ou despesa.
+                  <div className="tnum" style={{ fontSize: 14, fontWeight: 600, color: inc ? 'var(--positive)' : 'var(--ink)', whiteSpace: 'nowrap' }}>
+                    {inc ? '+' : '−'}{brl(Math.abs(t.amount)).replace('−', '')}
+                  </div>
                 </div>
-              )}
-            </div>
-          </Card>
-        </div>
-      </main>
-    </div>
+              );
+            })}
+            {recent.length === 0 && (
+              <div style={{ padding: '24px 0', color: 'var(--ink-3)', fontSize: 13 }}>
+                Nenhum movimento ainda. Lance sua primeira receita ou despesa.
+              </div>
+            )}
+          </div>
+        </Card>
+      </div>
+    </AppShell>
   );
 }
 

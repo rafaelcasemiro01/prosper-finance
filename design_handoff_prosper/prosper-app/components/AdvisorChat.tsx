@@ -68,13 +68,13 @@ export function AdvisorChat() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 80px)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: 'clamp(440px, 68vh, 720px)' }}>
       <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', paddingRight: 4 }}>
         <div style={{ maxWidth: 720, display: 'flex', flexDirection: 'column', gap: 16 }}>
           {messages.map((m, i) => <Bubble key={i} role={m.role} content={m.content} />)}
           {loading && <Bubble role="assistant" content="..." />}
           {messages.length === 1 && !loading && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 4 }}>
+            <div className="grid grid-2" style={{ gap: 8, marginTop: 4 }}>
               {SUGGESTIONS.map((s, i) => (
                 <button key={i} onClick={() => send(s.text)} style={{ textAlign: 'left', padding: '14px 16px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--radius)', display: 'flex', gap: 10, alignItems: 'center', fontSize: 14, color: 'var(--ink)' }}>
                   <span style={{ fontSize: 18, color: 'var(--accent)' }}>{s.icon}</span>

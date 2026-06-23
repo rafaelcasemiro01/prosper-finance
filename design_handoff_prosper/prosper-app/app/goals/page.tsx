@@ -1,4 +1,4 @@
-import { Sidebar } from '@/components/Sidebar';
+import { AppShell } from '@/components/AppShell';
 import { Eyebrow, ProgressBar } from '@/components/ui';
 import { GoalsBoard } from '@/components/GoalsBoard';
 import { getGoals } from '@/lib/queries';
@@ -12,34 +12,30 @@ export default async function GoalsPage() {
   const pct = target ? (saved / target) * 100 : 0;
 
   return (
-    <div style={{ display: 'flex', background: 'var(--bg)', minHeight: '100vh' }}>
-      <Sidebar active="/goals" />
+    <AppShell active="/goals" width="wide">
+      <Eyebrow>Sua jornada</Eyebrow>
+      <h1 className="h-page" style={{ margin: '6px 0 22px' }}>Metas e sonhos</h1>
 
-      <main style={{ flex: 1, padding: '40px 48px', maxWidth: 1200 }}>
-        <Eyebrow>Sua jornada</Eyebrow>
-        <h1 style={{ fontSize: 44, margin: '6px 0 24px', fontWeight: 700, letterSpacing: '-0.02em' }}>Metas e sonhos</h1>
-
-        {/* Overall progress hero */}
-        <div
-          style={{
-            background: 'linear-gradient(150deg, var(--ink) 0%, color-mix(in oklab, var(--ink) 86%, var(--accent)) 100%)',
-            color: 'var(--bg)', borderRadius: 'var(--radius-xl)', padding: 36, marginBottom: 22, boxShadow: 'var(--shadow-2)',
-          }}
-        >
-          <Eyebrow style={{ color: 'var(--ink-3)' }}>Progresso total</Eyebrow>
-          <div style={{ fontSize: 64, fontWeight: 700, color: 'var(--highlight)', lineHeight: 1, marginTop: 8 }}>
-            {Math.round(pct)}%
-          </div>
-          <div style={{ marginTop: 10, fontSize: 14, color: 'var(--ink-3)' }}>
-            <span style={{ color: 'var(--bg)' }}>{brl(saved)}</span> de {brl(target)} guardados
-          </div>
-          <div style={{ marginTop: 22 }}>
-            <ProgressBar pct={pct} height={5} color="var(--highlight)" track="rgba(255,255,255,0.12)" />
-          </div>
+      {/* Overall progress hero */}
+      <div
+        style={{
+          background: 'linear-gradient(150deg, var(--ink) 0%, color-mix(in oklab, var(--ink) 86%, var(--accent)) 100%)',
+          color: 'var(--bg)', borderRadius: 'var(--radius-xl)', padding: 'clamp(24px,4vw,36px)', marginBottom: 22, boxShadow: 'var(--shadow-2)',
+        }}
+      >
+        <Eyebrow style={{ color: 'var(--ink-3)' }}>Progresso total</Eyebrow>
+        <div style={{ fontSize: 'clamp(44px,8vw,64px)', fontWeight: 700, color: 'var(--highlight)', lineHeight: 1, marginTop: 8 }}>
+          {Math.round(pct)}%
         </div>
+        <div style={{ marginTop: 10, fontSize: 14, color: 'var(--ink-3)' }}>
+          <span style={{ color: 'var(--bg)' }}>{brl(saved)}</span> de {brl(target)} guardados
+        </div>
+        <div style={{ marginTop: 22 }}>
+          <ProgressBar pct={pct} height={5} color="var(--highlight)" track="rgba(255,255,255,0.12)" />
+        </div>
+      </div>
 
-        <GoalsBoard goals={goals} />
-      </main>
-    </div>
+      <GoalsBoard goals={goals} />
+    </AppShell>
   );
 }

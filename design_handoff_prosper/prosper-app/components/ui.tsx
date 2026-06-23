@@ -3,10 +3,11 @@ import React from 'react';
 // Lightweight UI primitives — port of the prototype's components.jsx.
 
 export function Card({
-  children, pad = 20, style, elevate = true,
-}: { children: React.ReactNode; pad?: number | string; style?: React.CSSProperties; elevate?: boolean }) {
+  children, pad = 20, style, elevate = true, className = '',
+}: { children: React.ReactNode; pad?: number | string; style?: React.CSSProperties; elevate?: boolean; className?: string }) {
   return (
     <div
+      className={className}
       style={{
         background: 'var(--surface)',
         border: '1px solid var(--line)',
@@ -37,30 +38,24 @@ export function ProgressBar({
 }
 
 export function Button({
-  children, variant = 'primary', full, type = 'button', onClick, style,
+  children, variant = 'primary', full, type = 'button', onClick, style, disabled, className = '',
 }: {
   children: React.ReactNode;
-  variant?: 'primary' | 'accent' | 'secondary';
+  variant?: 'primary' | 'accent' | 'secondary' | 'ghost';
   full?: boolean;
   type?: 'button' | 'submit';
   onClick?: () => void;
   style?: React.CSSProperties;
+  disabled?: boolean;
+  className?: string;
 }) {
-  const v = {
-    primary:   { bg: 'var(--ink)', color: 'var(--bg)', border: 'transparent' },
-    accent:    { bg: 'var(--accent)', color: 'var(--accent-ink)', border: 'transparent' },
-    secondary: { bg: 'transparent', color: 'var(--ink)', border: 'var(--ink-4)' },
-  }[variant];
   return (
     <button
       type={type}
       onClick={onClick}
-      style={{
-        height: 48, padding: '0 22px', borderRadius: 999, fontSize: 14, fontWeight: 600,
-        background: v.bg, color: v.color, border: `1px solid ${v.border}`,
-        width: full ? '100%' : 'auto', boxShadow: variant !== 'secondary' ? 'var(--shadow-1)' : 'none',
-        ...style,
-      }}
+      disabled={disabled}
+      className={`btn btn--${variant}${full ? ' btn--block' : ''} ${className}`.trim()}
+      style={style}
     >
       {children}
     </button>

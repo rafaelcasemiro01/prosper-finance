@@ -15,7 +15,7 @@ export function GoalsBoard({ goals }: { goals: Goal[] }) {
 
   return (
     <>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+      <div className="grid grid-3" style={{ gap: 14 }}>
         {goals.map((g) => {
           const pct = g.target ? (g.current / g.target) * 100 : 0;
           return (

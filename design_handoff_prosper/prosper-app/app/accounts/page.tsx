@@ -1,4 +1,4 @@
-import { Sidebar } from '@/components/Sidebar';
+import { AppShell } from '@/components/AppShell';
 import { Card, Eyebrow } from '@/components/ui';
 import { AccountsBoard } from '@/components/AccountsBoard';
 import { getAccounts } from '@/lib/queries';
@@ -15,30 +15,26 @@ export default async function AccountsPage() {
   const loans = accounts.filter((a) => a.kind === 'emprestimo').reduce((s, a) => s + (a.outstanding ?? 0), 0);
 
   return (
-    <div style={{ display: 'flex', background: 'var(--bg)', minHeight: '100vh' }}>
-      <Sidebar active="/accounts" />
+    <AppShell active="/accounts" width="wide">
+      <Eyebrow>Open Finance</Eyebrow>
+      <h1 className="h-page" style={{ margin: '6px 0 22px' }}>Contas &amp; Cartões</h1>
 
-      <main style={{ flex: 1, padding: '40px 48px', maxWidth: 1100 }}>
-        <Eyebrow>Open Finance</Eyebrow>
-        <h1 style={{ fontSize: 44, margin: '6px 0 24px', fontWeight: 700, letterSpacing: '-0.02em' }}>Contas &amp; Cartões</h1>
+      <div className="grid grid-3" style={{ marginBottom: 22 }}>
+        <Card pad={18} className="card--hover">
+          <Eyebrow style={{ color: 'var(--positive)' }}>Em contas</Eyebrow>
+          <div className="tnum" style={{ fontSize: 26, fontWeight: 700, marginTop: 6 }}>{brl(inAccounts)}</div>
+        </Card>
+        <Card pad={18} className="card--hover">
+          <Eyebrow style={{ color: 'var(--warning)' }}>Faturas em aberto</Eyebrow>
+          <div className="tnum" style={{ fontSize: 26, fontWeight: 700, marginTop: 6 }}>{brl(cardBills)}</div>
+        </Card>
+        <Card pad={18} className="card--hover">
+          <Eyebrow style={{ color: 'var(--negative)' }}>Empréstimos</Eyebrow>
+          <div className="tnum" style={{ fontSize: 26, fontWeight: 700, marginTop: 6 }}>{brl(loans)}</div>
+        </Card>
+      </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 22 }}>
-          <Card pad={18}>
-            <Eyebrow style={{ color: 'var(--positive)' }}>Em contas</Eyebrow>
-            <div className="tnum" style={{ fontSize: 26, fontWeight: 700, marginTop: 6 }}>{brl(inAccounts)}</div>
-          </Card>
-          <Card pad={18}>
-            <Eyebrow style={{ color: 'var(--warning)' }}>Faturas em aberto</Eyebrow>
-            <div className="tnum" style={{ fontSize: 26, fontWeight: 700, marginTop: 6 }}>{brl(cardBills)}</div>
-          </Card>
-          <Card pad={18}>
-            <Eyebrow style={{ color: 'var(--negative)' }}>Empréstimos</Eyebrow>
-            <div className="tnum" style={{ fontSize: 26, fontWeight: 700, marginTop: 6 }}>{brl(loans)}</div>
-          </Card>
-        </div>
-
-        <AccountsBoard accounts={accounts} />
-      </main>
-    </div>
+      <AccountsBoard accounts={accounts} />
+    </AppShell>
   );
 }
