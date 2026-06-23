@@ -9,6 +9,9 @@
   --shadow-2: 0 6px 16px rgba(20,32,58,.07), 0 20px 48px rgba(20,32,58,.10);
   --shadow-pop: 0 10px 24px rgba(20,32,58,.10), 0 28px 64px rgba(20,32,58,.14);
   --glow-accent: 0 8px 28px rgba(200,160,44,.34);
+  --glass-bg: color-mix(in oklab, var(--surface) 80%, transparent);
+  --glass-border: color-mix(in oklab, var(--ink) 12%, transparent);
+  --glass-hi: rgba(255,255,255,.55);
   --radius-sm: 8px; --radius: 14px; --radius-lg: 22px; --radius-xl: 28px;
 }
 [data-theme="dark"] {
@@ -22,20 +25,29 @@
   --shadow-2: 0 8px 22px rgba(0,0,0,.45), 0 24px 56px rgba(0,0,0,.55);
   --shadow-pop: 0 12px 30px rgba(0,0,0,.55), 0 32px 72px rgba(0,0,0,.6);
   --glow-accent: 0 8px 28px rgba(231,181,60,.32);
+  --glass-bg: color-mix(in oklab, var(--surface) 58%, transparent);
+  --glass-border: color-mix(in oklab, #ffffff 12%, transparent);
+  --glass-hi: rgba(255,255,255,.10);
 }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 html { -webkit-text-size-adjust: 100%; }
 body {
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(60vmax 60vmax at 8% -5%, color-mix(in oklab, var(--accent) 16%, transparent), transparent 55%),
+    radial-gradient(55vmax 55vmax at 102% 8%, color-mix(in oklab, var(--ink) 9%, transparent), transparent 55%),
+    radial-gradient(60vmax 60vmax at 88% 105%, color-mix(in oklab, var(--accent) 11%, transparent), transparent 60%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   color: var(--ink);
   font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
   font-feature-settings: 'cv05','cv08','ss01';
   letter-spacing: -0.011em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background 0.25s ease, color 0.25s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; cursor: pointer; }
@@ -65,31 +77,33 @@ input, textarea, select { font: inherit; }
   padding: 40px 48px;
   width: 100%;
   margin-inline: auto;
-  animation: pf-fade .35s ease both;
+  animation: pf-fade .2s ease both;
 }
 .app-main--narrow { max-width: 760px; }
 .app-main--wide   { max-width: 1200px; }
 
-/* ───────── Cards ───────── */
+/* ───────── Cards (liquid glass) ───────── */
 .card {
-  background: var(--surface);
-  border: 1px solid var(--line);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(16px) saturate(165%);
+  backdrop-filter: blur(16px) saturate(165%);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-1);
+  box-shadow: var(--shadow-1), inset 0 1px 0 var(--glass-hi);
   padding: 20px;
 }
 .card--hover { transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
-.card--hover:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); border-color: var(--ink-4); }
+.card--hover:hover { transform: translateY(-2px); box-shadow: var(--shadow-2), inset 0 1px 0 var(--glass-hi); border-color: var(--ink-4); }
 
 /* ───────── Buttons ───────── */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   height: 48px; padding: 0 22px; border-radius: 999px;
   font-size: 14px; font-weight: 600; border: 1px solid transparent;
-  transition: transform .12s ease, box-shadow .18s ease, background .18s ease, opacity .18s ease;
-  box-shadow: var(--shadow-1); white-space: nowrap;
+  transition: transform .1s ease, box-shadow .18s ease, background .18s ease, opacity .18s ease;
+  box-shadow: var(--shadow-1), inset 0 1px 0 var(--glass-hi); white-space: nowrap;
 }
-.btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-2); }
+.btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-2), inset 0 1px 0 var(--glass-hi); }
 .btn:active { transform: translateY(0) scale(.98); }
 .btn:disabled { opacity: .5; pointer-events: none; box-shadow: none; }
 .btn--block { width: 100%; }
@@ -133,6 +147,8 @@ input, textarea, select { font: inherit; }
 @keyframes pf-pop { 0% { transform: scale(.96); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 .anim-fade-up { animation: pf-fade-up .45s cubic-bezier(.2,.8,.2,1) both; }
 .anim-pop { animation: pf-pop .25s cubic-bezier(.2,.8,.2,1) both; }
+.sk { background: linear-gradient(90deg, var(--surface-2) 25%, color-mix(in oklab, var(--surface-2) 55%, var(--bg)) 38%, var(--surface-2) 60%); background-size: 300% 100%; border-radius: var(--radius-lg); animation: sk-shimmer 1.3s ease-in-out infinite; }
+@keyframes sk-shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
 }
