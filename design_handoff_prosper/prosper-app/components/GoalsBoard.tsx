@@ -112,11 +112,11 @@ function NewGoalModal({ onClose }: { onClose: () => void }) {
   const canSave = name.trim() && tNum > 0 && cNum <= tNum;
 
   const field = (label: string, val: string, set: (v: string) => void, ph: string, money?: boolean) => (
-    <div style={{ marginBottom: 14 }}>
+    <div style={{ marginBottom: 14, minWidth: 0 }}>
       <Eyebrow style={{ marginBottom: 8 }}>{label}</Eyebrow>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '11px 14px', borderRadius: 12, background: 'var(--surface-2)', border: '1px solid var(--line)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '11px 14px', borderRadius: 12, background: 'var(--surface-2)', border: '1px solid var(--line)', minWidth: 0 }}>
         {money && <span style={{ color: 'var(--ink-3)' }}>R$</span>}
-        <input value={val} onChange={(e) => set(e.target.value)} inputMode={money ? 'decimal' : 'text'} placeholder={ph} style={{ flex: 1, border: 'none', background: 'none', outline: 'none', fontSize: 15, color: 'var(--ink)', fontWeight: money ? 600 : 400 }} />
+        <input value={val} onChange={(e) => set(e.target.value)} inputMode={money ? 'decimal' : 'text'} placeholder={ph} style={{ flex: 1, minWidth: 0, width: '100%', border: 'none', background: 'none', outline: 'none', fontSize: 15, color: 'var(--ink)', fontWeight: money ? 600 : 400 }} />
       </div>
     </div>
   );
