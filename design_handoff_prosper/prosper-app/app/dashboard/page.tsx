@@ -1,5 +1,6 @@
 import { AppShell } from '@/components/AppShell';
 import { Card, Eyebrow, ProgressBar } from '@/components/ui';
+import { NewTransactionForm } from '@/components/NewTransactionForm';
 import {
   getProfile, getBalanceTotal, getMonthSummary, getGoals, getTransactions,
 } from '@/lib/queries';
@@ -24,8 +25,13 @@ export default async function DashboardPage() {
 
   return (
     <AppShell active="/dashboard" width="wide">
-      <Eyebrow>Boa noite</Eyebrow>
-      <h1 className="h-page" style={{ margin: '6px 0 28px' }}>Olá, {firstName}</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap', margin: '0 0 28px' }}>
+        <div>
+          <Eyebrow>Boa noite</Eyebrow>
+          <h1 className="h-page" style={{ margin: '6px 0 0' }}>Olá, {firstName}</h1>
+        </div>
+        <NewTransactionForm />
+      </div>
 
       <div className="grid grid-hero" style={{ marginBottom: 16 }}>
         {/* Hero balance */}

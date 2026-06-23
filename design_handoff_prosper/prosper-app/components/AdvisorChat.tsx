@@ -71,6 +71,10 @@ export function AdvisorChat() {
     <div style={{ display: 'flex', flexDirection: 'column', height: 'clamp(440px, 68vh, 720px)' }}>
       <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', paddingRight: 4 }}>
         <div style={{ maxWidth: 720, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', background: 'var(--accent-soft)', border: '1px solid var(--accent)', borderRadius: 12, fontSize: 13, color: 'var(--ink)' }}>
+            <span style={{ fontSize: 16 }}>✨</span>
+            <span>Esta é uma prévia com respostas de exemplo. Em breve vamos implementar o consultor com <strong>IA de verdade</strong>, analisando seus dados em tempo real.</span>
+          </div>
           {messages.map((m, i) => <Bubble key={i} role={m.role} content={m.content} />)}
           {loading && <Bubble role="assistant" content="..." />}
           {messages.length === 1 && !loading && (
@@ -91,7 +95,7 @@ export function AdvisorChat() {
         <button type="submit" disabled={!input.trim() || loading} style={{ width: 40, height: 40, borderRadius: '50%', border: 'none', background: input.trim() ? 'var(--accent)' : 'var(--line)', color: input.trim() ? 'var(--accent-ink)' : 'var(--ink-3)', fontSize: 16 }}>↑</button>
       </form>
       <div style={{ fontSize: 11, color: 'var(--ink-3)', textAlign: 'center', marginTop: 8 }}>
-        Analisa seus dados em tempo real · suas conversas são privadas
+        Funcionalidade de IA em desenvolvimento · disponível em breve
       </div>
     </div>
   );

@@ -46,6 +46,26 @@ export async function addGoal(input: {
   revalidatePath('/goals');
 }
 
+// Atualiza campos de uma meta (nome, valor, data, etc.) — RLS garante o dono.
+export async function updateGoal(
+  id: string,
+  patch: { name?: string; target?: number; current?: number; deadline?: string | null; emoji?: string; color?: string; shared?: boolean; note?: string },
+) {
+  const supabase = await createClient();
+  const { error } = await supabase.from('goals').update(patch).eq('id', id);
+  if (error) throw error;
+  revalidatePath('/goals');
+  revalidatePath('/dashboard');
+}
+
+export async function deleteGoal(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from('goals').delete().eq('id', id);
+  if (error) throw error;
+  revalidatePath('/goals');
+  revalidatePath('/dashboard');
+}
+
 // Atomic contribution via the SQL function contribute_to_goal().
 export async function contributeToGoal(goalId: string, amount: number) {
   const supabase = await createClient();
