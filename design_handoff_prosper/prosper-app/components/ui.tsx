@@ -7,15 +7,8 @@ export function Card({
 }: { children: React.ReactNode; pad?: number | string; style?: React.CSSProperties; elevate?: boolean; className?: string }) {
   return (
     <div
-      className={className}
-      style={{
-        background: 'var(--surface)',
-        border: '1px solid var(--line)',
-        borderRadius: 'var(--radius-lg)',
-        boxShadow: elevate ? 'var(--shadow-1)' : 'none',
-        padding: pad,
-        ...style,
-      }}
+      className={`card ${className}`.trim()}
+      style={{ padding: pad, ...(elevate ? null : { boxShadow: 'none' }), ...style }}
     >
       {children}
     </div>

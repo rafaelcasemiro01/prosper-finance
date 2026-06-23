@@ -65,7 +65,7 @@ input, textarea, select { font: inherit; }
   padding: 40px 48px;
   width: 100%;
   margin-inline: auto;
-  animation: pf-fade-up .4s cubic-bezier(.2,.8,.2,1) both;
+  animation: pf-fade .35s ease both;
 }
 .app-main--narrow { max-width: 760px; }
 .app-main--wide   { max-width: 1200px; }
