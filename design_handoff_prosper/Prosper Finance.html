@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prosper Finance — App de Gestão Financeira</title>
+
+<!-- ext-resource-dependency: fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css">
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; background: #E4EAF3; }
+  * { -webkit-tap-highlight-color: transparent; }
+  #root { height: 100vh; }
+  /* Frame label */
+  .frame-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: #9A958B; font-weight: 500;
+    margin-bottom: 14px;
+  }
+</style>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#14203A"/>
+    <circle cx="50" cy="50" r="26" fill="none" stroke="#E7B53C" stroke-width="2.2"/>
+    <path d="M41 64V37h9a7 7 0 0 1 0 14h-9" fill="none" stroke="#E7B53C" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</template>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script src="data.js"></script>
+<script src="store.js"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="browser-window.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="icons.jsx"></script>
+<script type="text/babel" src="components.jsx"></script>
+<script type="text/babel" src="screens.jsx"></script>
+<script type="text/babel" src="screens-2.jsx"></script>
+<script type="text/babel" src="ai-chat.jsx"></script>
+<script type="text/babel" src="accounts.jsx"></script>
+<script type="text/babel" src="shells.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+const { useState } = React;
+
+// ── EDITMODE (tweaks persisted block) ──
+const TWEAKS = {
+  theme: 'light',
+};
+
+function App() {
+  const [tw, setTweak] = useTweaks(TWEAKS);
+  const theme = tw.theme;
+  const setTheme = (t) => setTweak('theme', t);
+
+  return (
+    <>
+      <DesignCanvas>
+        <DCSection id="mobile" title="Prosper — Mobile (iOS)" subtitle="App nativo · navegação por abas · toque para explorar todas as telas">
+          <DCArtboard id="m-app" label="App completo — comece pelo onboarding" width={402} height={874}>
+            <DeviceMobile theme={theme} setTheme={setTheme} />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="web" title="Prosper — Web / Desktop" subtitle="Dashboard responsivo · navegação lateral · mesma base visual">
+          <DCArtboard id="w-dash" label="Dashboard" width={1280} height={860}>
+            <DeviceWeb theme={theme} setTheme={setTheme} initial="dashboard" />
+          </DCArtboard>
+          <DCArtboard id="w-analytics" label="Análises e gráficos" width={1280} height={860}>
+            <DeviceWeb theme={theme} setTheme={setTheme} initial="analytics" />
+          </DCArtboard>
+          <DCArtboard id="w-goals" label="Metas e objetivos" width={1280} height={860}>
+            <DeviceWeb theme={theme} setTheme={setTheme} initial="goals" />
+          </DCArtboard>
+          <DCArtboard id="w-ai" label="Consultor IA (responde de verdade)" width={1280} height={860}>
+            <DeviceWeb theme={theme} setTheme={setTheme} initial="ai" />
+          </DCArtboard>
+        </DCSection>
+      </DesignCanvas>
+
+      <TweaksPanel title="Tweaks">
+        <TweakSection label="Aparência">
+          <TweakRadio
+            label="Tema"
+            value={theme}
+            options={[{ label: 'Claro', value: 'light' }, { label: 'Escuro', value: 'dark' }]}
+            onChange={(v) => setTweak('theme', v)}
+          />
+        </TweakSection>
+      </TweaksPanel>
+    </>
+  );
+}
+
+// Mobile device frame wrapping the full clickable app
+function DeviceMobile({ theme, setTheme }) {
+  return (
+    <IOSDevice width={402} height={874} dark={theme === 'dark'}>
+      <div style={{ height: '100%', paddingTop: 54, boxSizing: 'border-box' }}>
+        <MobileShell theme={theme} setTheme={setTheme} />
+      </div>
+    </IOSDevice>
+  );
+}
+
+// Web browser frame wrapping the responsive app
+function DeviceWeb({ theme, setTheme, initial }) {
+  return (
+    <ChromeWindow
+      tabs={[{ title: 'Prosper Finance' }, { title: 'Novo' }]}
+      activeIndex={0}
+      url="app.prosper.finance"
+      width={1280}
+      height={860}
+    >
+      <div style={{ height: '100%' }}>
+        <WebShell theme={theme} setTheme={setTheme} initialScreen={initial} />
+      </div>
+    </ChromeWindow>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
