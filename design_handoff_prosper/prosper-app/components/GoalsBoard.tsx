@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { addGoal, contributeToGoal } from '@/lib/actions';
+import { addGoal, contributeToGoal, updateGoal, deleteGoal } from '@/lib/actions';
 import { parseBRL, brl } from '@/lib/format';
 import { Button, Card, Eyebrow, ProgressBar } from '@/components/ui';
 import type { Goal } from '@/lib/types';
@@ -12,6 +12,7 @@ const COLORS = ['#C8A02C', '#1F8A5B', '#B5642B', '#2E7D9A', '#8E5B8A', '#14203A'
 export function GoalsBoard({ goals }: { goals: Goal[] }) {
   const [newOpen, setNewOpen] = useState(false);
   const [contribFor, setContribFor] = useState<Goal | null>(null);
+  const [editFor, setEditFor] = useState<Goal | null>(null);
 
   return (
     <>
@@ -20,9 +21,14 @@ export function GoalsBoard({ goals }: { goals: Goal[] }) {
           const pct = g.target ? (g.current / g.target) * 100 : 0;
           return (
             <Card key={g.id} pad={26}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <span style={{ fontSize: 28, color: g.color }}>{g.emoji}</span>
-                {g.shared && <span style={{ fontSize: 11, color: 'var(--ink-3)', background: 'var(--surface-2)', padding: '4px 10px', borderRadius: 999 }}>Casal</span>}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  {g.shared && <span style={{ fontSize: 11, color: 'var(--ink-3)', background: 'var(--surface-2)', padding: '4px 10px', borderRadius: 999 }}>Casal</span>}
+                  <button onClick={() => setEditFor(g)} aria-label="Editar meta" title="Editar meta" style={{ width: 32, height: 32, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, border: '1px solid var(--line)', background: 'var(--surface-2)', color: 'var(--ink-2)' }}>
+                    <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M13.5 6.5l3 3"/></svg>
+                  </button>
+                </div>
               </div>
               <div style={{ fontSize: 22, fontWeight: 700, marginTop: 14, lineHeight: 1.15 }}>{g.name}</div>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: 18 }}>
@@ -57,6 +63,7 @@ export function GoalsBoard({ goals }: { goals: Goal[] }) {
 
       {newOpen && <NewGoalModal onClose={() => setNewOpen(false)} />}
       {contribFor && <ContributeModal goal={contribFor} onClose={() => setContribFor(null)} />}
+      {editFor && <EditGoalModal goal={editFor} onClose={() => setEditFor(null)} />}
     </>
   );
 }
@@ -150,6 +157,69 @@ function NewGoalModal({ onClose }: { onClose: () => void }) {
       <Button full onClick={() => start(async () => { await addGoal({ name: name.trim(), target: tNum, current: cNum, emoji, color, shared }); onClose(); })} style={{ opacity: canSave && !pending ? 1 : 0.45 }}>
         {pending ? 'Criando...' : 'Criar meta'}
       </Button>
+    </Modal>
+  );
+}
+
+function EditGoalModal({ goal, onClose }: { goal: Goal; onClose: () => void }) {
+  const [name, setName] = useState(goal.name);
+  const [target, setTarget] = useState(String(goal.target).replace('.', ','));
+  const [current, setCurrent] = useState(String(goal.current).replace('.', ','));
+  const [deadline, setDeadline] = useState(goal.deadline ?? '');
+  const [confirmDel, setConfirmDel] = useState(false);
+  const [pending, start] = useTransition();
+
+  const tNum = parseBRL(target);
+  const cNum = parseBRL(current);
+  const canSave = name.trim().length > 0 && tNum > 0 && cNum <= tNum;
+
+  const money = (label: string, val: string, set: (v: string) => void) => (
+    <div style={{ minWidth: 0 }}>
+      <Eyebrow style={{ marginBottom: 8 }}>{label}</Eyebrow>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '11px 14px', borderRadius: 12, background: 'var(--surface-2)', border: '1px solid var(--line)', minWidth: 0 }}>
+        <span style={{ color: 'var(--ink-3)' }}>R$</span>
+        <input value={val} onChange={(e) => set(e.target.value)} inputMode="decimal" placeholder="0,00" style={{ flex: 1, minWidth: 0, width: '100%', border: 'none', background: 'none', outline: 'none', fontSize: 15, fontWeight: 600, color: 'var(--ink)' }} />
+      </div>
+    </div>
+  );
+
+  return (
+    <Modal onClose={onClose}>
+      <h2 style={{ margin: '0 0 18px', fontSize: 22, fontWeight: 700 }}>Editar meta</h2>
+
+      <div style={{ marginBottom: 14 }}>
+        <Eyebrow style={{ marginBottom: 8 }}>Nome do sonho</Eyebrow>
+        <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Viagem, Reserva, Carro..." />
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
+        {money('Objetivo', target, setTarget)}
+        {money('Já guardado', current, setCurrent)}
+      </div>
+
+      <div style={{ marginBottom: 20 }}>
+        <Eyebrow style={{ marginBottom: 8 }}>Data da meta</Eyebrow>
+        <input className="input" type="date" value={deadline ?? ''} onChange={(e) => setDeadline(e.target.value)} />
+      </div>
+
+      {confirmDel ? (
+        <div style={{ display: 'flex', gap: 10, marginBottom: 4 }}>
+          <Button variant="secondary" full onClick={() => setConfirmDel(false)}>Cancelar</Button>
+          <Button full onClick={() => start(async () => { await deleteGoal(goal.id); onClose(); })} style={{ background: 'var(--negative)', color: '#fff', borderColor: 'transparent' }}>
+            {pending ? 'Excluindo...' : 'Confirmar exclusão'}
+          </Button>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', gap: 10, marginBottom: 4 }}>
+          <Button variant="secondary" onClick={() => setConfirmDel(true)} style={{ color: 'var(--negative)', borderColor: 'var(--negative)' }}>Excluir</Button>
+          <Button full onClick={() => start(async () => {
+            await updateGoal(goal.id, { name: name.trim(), target: tNum, current: cNum, deadline: deadline || null });
+            onClose();
+          })} style={{ opacity: canSave && !pending ? 1 : 0.45 }}>
+            {pending ? 'Salvando...' : 'Salvar alterações'}
+          </Button>
+        </div>
+      )}
     </Modal>
   );
 }
