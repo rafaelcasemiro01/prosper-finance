@@ -1,6 +1,7 @@
 import { AppShell } from '@/components/AppShell';
 import { Card, Eyebrow, ProgressBar } from '@/components/ui';
 import { NewTransactionForm } from '@/components/NewTransactionForm';
+import { AnimatedNumber } from '@/components/AnimatedNumber';
 import {
   getProfile, getBalanceTotal, getMonthSummary, getGoals, getTransactions,
 } from '@/lib/queries';
@@ -44,7 +45,7 @@ export default async function DashboardPage() {
         >
           <Eyebrow style={{ color: 'var(--ink-3)' }}>Patrimônio total · BRL</Eyebrow>
           <div className="tnum" style={{ fontSize: 'clamp(40px, 8vw, 64px)', fontWeight: 700, marginTop: 14, letterSpacing: '-0.03em', lineHeight: 1 }}>
-            {brl(total)}
+            <AnimatedNumber value={total} />
           </div>
           <div
             style={{
@@ -62,11 +63,11 @@ export default async function DashboardPage() {
         <div className="grid" style={{ gridAutoRows: '1fr', gap: 16 }}>
           <Card className="card--hover">
             <Eyebrow style={{ color: 'var(--positive)' }}>Receitas · mês</Eyebrow>
-            <div className="tnum" style={{ fontSize: 'clamp(28px,5vw,34px)', fontWeight: 700, marginTop: 8 }}>{brl(month.income)}</div>
+            <div className="tnum" style={{ fontSize: 'clamp(28px,5vw,34px)', fontWeight: 700, marginTop: 8 }}><AnimatedNumber value={month.income} /></div>
           </Card>
           <Card className="card--hover">
             <Eyebrow style={{ color: 'var(--negative)' }}>Despesas · mês</Eyebrow>
-            <div className="tnum" style={{ fontSize: 'clamp(28px,5vw,34px)', fontWeight: 700, marginTop: 8 }}>{brl(month.expense)}</div>
+            <div className="tnum" style={{ fontSize: 'clamp(28px,5vw,34px)', fontWeight: 700, marginTop: 8 }}><AnimatedNumber value={month.expense} /></div>
           </Card>
         </div>
       </div>

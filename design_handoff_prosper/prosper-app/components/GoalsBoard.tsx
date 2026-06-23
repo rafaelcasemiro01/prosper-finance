@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { motion } from 'framer-motion';
 import { addGoal, contributeToGoal, updateGoal, deleteGoal } from '@/lib/actions';
 import { parseBRL, brl } from '@/lib/format';
 import { Button, Card, Eyebrow, ProgressBar } from '@/components/ui';
+import { AnimatedNumber } from '@/components/AnimatedNumber';
 import type { Goal } from '@/lib/types';
 
 const EMOJIS = ['✺', '◐', '◇', '⊙', '✦', '❂'];
@@ -32,7 +34,7 @@ export function GoalsBoard({ goals }: { goals: Goal[] }) {
               </div>
               <div style={{ fontSize: 22, fontWeight: 700, marginTop: 14, lineHeight: 1.15 }}>{g.name}</div>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: 18 }}>
-                <span style={{ fontSize: 40, fontWeight: 700, color: g.color }}>{Math.round(pct)}%</span>
+                <span style={{ fontSize: 40, fontWeight: 700, color: g.color }}><AnimatedNumber value={pct} kind="percent" /></span>
               </div>
               <div style={{ marginTop: 12 }}><ProgressBar pct={pct} color={g.color} height={4} /></div>
               <div style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--ink-2)' }}>
@@ -70,11 +72,11 @@ export function GoalsBoard({ goals }: { goals: Goal[] }) {
 
 function Modal({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(10,14,22,.5)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: 'var(--surface)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--line)', boxShadow: 'var(--shadow-2)', padding: 28, width: 460, maxWidth: '100%' }}>
+    <motion.div onClick={onClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.18 }} style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(10,14,22,.5)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <motion.div onClick={(e) => e.stopPropagation()} initial={{ opacity: 0, scale: 0.94, y: 14 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ type: 'spring', stiffness: 320, damping: 26 }} style={{ background: 'var(--surface)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--line)', boxShadow: 'var(--shadow-2)', padding: 28, width: 460, maxWidth: '100%' }}>
         {children}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 

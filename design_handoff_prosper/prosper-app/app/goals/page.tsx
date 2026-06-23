@@ -1,5 +1,6 @@
 import { AppShell } from '@/components/AppShell';
 import { Eyebrow, ProgressBar } from '@/components/ui';
+import { AnimatedNumber } from '@/components/AnimatedNumber';
 import { GoalsBoard } from '@/components/GoalsBoard';
 import { getGoals } from '@/lib/queries';
 import { brl } from '@/lib/format';
@@ -25,7 +26,7 @@ export default async function GoalsPage() {
       >
         <Eyebrow style={{ color: 'var(--ink-3)' }}>Progresso total</Eyebrow>
         <div style={{ fontSize: 'clamp(44px,8vw,64px)', fontWeight: 700, color: 'var(--highlight)', lineHeight: 1, marginTop: 8 }}>
-          {Math.round(pct)}%
+          <AnimatedNumber value={pct} kind="percent" />
         </div>
         <div style={{ marginTop: 10, fontSize: 14, color: 'var(--ink-3)' }}>
           <span style={{ color: 'var(--bg)' }}>{brl(saved)}</span> de {brl(target)} guardados
