@@ -43,7 +43,7 @@ export default async function DashboardPage() {
           <Eyebrow>Boa noite</Eyebrow>
           <h1 className="h-page" style={{ margin: '6px 0 0' }}>Olá, {firstName}</h1>
         </div>
-        <NewTransactionForm customCategories={customCategories} />
+        <NewTransactionForm customCategories={customCategories} cards={accounts.filter((a) => a.kind === 'cartao')} />
       </div>
 
       {/* Lembretes de vencimento de cartão */}

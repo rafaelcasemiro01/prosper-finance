@@ -29,6 +29,8 @@ export interface Transaction {
   amount: number;   // + income, - expense
   type: TxType;
   currency: string;
+  paid?: boolean;           // despesa paga?
+  account_id?: string | null; // cartão vinculado (para abater limite ao pagar)
 }
 
 export interface Goal {

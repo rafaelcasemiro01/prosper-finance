@@ -41,20 +41,36 @@ export function AccountsBoard({ accounts }: { accounts: Account[] }) {
 
       <ListSection label="Cartões de crédito">
         {cartoes.map((a) => {
-          const pct = a.credit_limit ? ((a.used ?? 0) / a.credit_limit) * 100 : 0;
+          const limit = a.credit_limit ?? 0;
+          const usedV = a.used ?? 0;
+          const avail = Math.max(0, limit - usedV);
+          const pct = limit ? (usedV / limit) * 100 : 0;
           return (
             <AccountRow key={a.id} a={a} onEdit={() => setEdit(a)} sub={`Vence dia ${a.due ?? '—'}`}>
-              <div style={{ minWidth: 150 }}>
+              <div style={{ minWidth: 180 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 5 }}>
-                  <span style={{ color: 'var(--ink-2)' }}>{brl(a.used ?? 0)}</span>
-                  <span style={{ color: 'var(--ink-3)' }}>de {brl(a.credit_limit ?? 0)}</span>
+                  <span style={{ color: 'var(--ink-2)' }}>Usado {brl(usedV)}</span>
+                  <span style={{ color: 'var(--ink-3)' }}>de {brl(limit)}</span>
                 </div>
                 <ProgressBar pct={pct} height={4} color={pct > 80 ? 'var(--negative)' : 'var(--accent)'} />
+                <div style={{ fontSize: 12, color: 'var(--positive)', marginTop: 5, fontWeight: 600 }}>
+                  Disponível {brl(avail)}
+                </div>
               </div>
             </AccountRow>
           );
         })}
         {cartoes.length === 0 && <Empty />}
+        {cartoes.length > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0 12px', borderTop: '1px solid var(--line)', marginTop: 2 }}>
+            <span className="eyebrow">Total dos cartões</span>
+            <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+              <TotalItem label="Limite" value={brl(cartoes.reduce((s, a) => s + (a.credit_limit ?? 0), 0))} />
+              <TotalItem label="Usado" value={brl(cartoes.reduce((s, a) => s + (a.used ?? 0), 0))} color="var(--negative)" />
+              <TotalItem label="Disponível" value={brl(cartoes.reduce((s, a) => s + Math.max(0, (a.credit_limit ?? 0) - (a.used ?? 0)), 0))} color="var(--positive)" />
+            </div>
+          </div>
+        )}
       </ListSection>
 
       <ListSection label="Empréstimos">
@@ -92,6 +108,15 @@ function ListSection({ label, children }: { label: string; children: React.React
 
 function Empty() {
   return <div style={{ padding: '20px 0', color: 'var(--ink-3)', fontSize: 13, textAlign: 'center' }}>Nada por aqui ainda.</div>;
+}
+
+function TotalItem({ label, value, color }: { label: string; value: string; color?: string }) {
+  return (
+    <div style={{ textAlign: 'right' }}>
+      <div style={{ fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>{label}</div>
+      <div className="tnum" style={{ fontSize: 15, fontWeight: 700, color: color ?? 'var(--ink)', marginTop: 2 }}>{value}</div>
+    </div>
+  );
 }
 
 function AccountRow({ a, sub, children, onEdit }: { a: Account; sub?: string; children: React.ReactNode; onEdit: () => void }) {

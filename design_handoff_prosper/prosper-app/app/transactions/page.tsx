@@ -2,15 +2,17 @@ import { AppShell } from '@/components/AppShell';
 import { Card, Eyebrow } from '@/components/ui';
 import { NewTransactionForm } from '@/components/NewTransactionForm';
 import { TransactionList } from '@/components/TransactionList';
-import { getTransactions, getCustomCategories } from '@/lib/queries';
+import { getTransactions, getCustomCategories, getAccounts } from '@/lib/queries';
 import { brl } from '@/lib/format';
 
 // Server Component — fetches RLS-scoped transactions, renders summary + list.
 export default async function TransactionsPage() {
-  const [transactions, customCategories] = await Promise.all([
+  const [transactions, customCategories, accounts] = await Promise.all([
     getTransactions(),
     getCustomCategories(),
+    getAccounts(),
   ]);
+  const cards = accounts.filter((a) => a.kind === 'cartao');
 
   const income = transactions.filter((t) => t.amount > 0).reduce((a, t) => a + t.amount, 0);
   const expense = transactions.filter((t) => t.amount < 0).reduce((a, t) => a + Math.abs(t.amount), 0);
@@ -22,7 +24,7 @@ export default async function TransactionsPage() {
           <Eyebrow>Suas finanças</Eyebrow>
           <h1 className="h-page" style={{ margin: '6px 0 0' }}>Movimentos</h1>
         </div>
-        <NewTransactionForm customCategories={customCategories} />
+        <NewTransactionForm customCategories={customCategories} cards={cards} />
       </div>
 
       <div className="grid grid-2" style={{ marginBottom: 24 }}>
@@ -36,7 +38,7 @@ export default async function TransactionsPage() {
         </Card>
       </div>
 
-      <TransactionList transactions={transactions} customCategories={customCategories} />
+      <TransactionList transactions={transactions} customCategories={customCategories} cards={cards} />
     </AppShell>
   );
 }

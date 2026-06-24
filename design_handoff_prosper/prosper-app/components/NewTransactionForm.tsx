@@ -4,6 +4,8 @@ import { useState, useTransition } from 'react';
 import { motion } from 'framer-motion';
 import { addTransaction, addCategory } from '@/lib/actions';
 import { parseBRL } from '@/lib/format';
+import { resolveBank } from '@/lib/banks';
+import type { Account } from '@/lib/types';
 import {
   buildCategoryMap, slugify, CATEGORY_COLORS,
   DEFAULT_EXPENSE_TYPES, DEFAULT_INCOME_TYPES, type Category,
@@ -17,17 +19,17 @@ function todayISO() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-export function NewTransactionForm({ customCategories = [] }: { customCategories?: Category[] }) {
+export function NewTransactionForm({ customCategories = [], cards = [] }: { customCategories?: Category[]; cards?: Account[] }) {
   const [open, setOpen] = useState(false);
   return (
     <>
       <Button variant="primary" onClick={() => setOpen(true)}>+ Lançar movimento</Button>
-      {open && <Modal customCategories={customCategories} onClose={() => setOpen(false)} />}
+      {open && <Modal customCategories={customCategories} cards={cards} onClose={() => setOpen(false)} />}
     </>
   );
 }
 
-function Modal({ customCategories, onClose }: { customCategories: Category[]; onClose: () => void }) {
+function Modal({ customCategories, cards, onClose }: { customCategories: Category[]; cards: Account[]; onClose: () => void }) {
   const [type, setType] = useState<'expense' | 'income'>('expense');
   const [amount, setAmount] = useState('');
   const [name, setName] = useState('');
@@ -35,6 +37,8 @@ function Modal({ customCategories, onClose }: { customCategories: Category[]; on
   const [occurredOn, setOccurredOn] = useState(todayISO());
   const [dueDate, setDueDate] = useState('');
   const [subtype, setSubtype] = useState('');
+  const [accountId, setAccountId] = useState<string>('');
+  const [paid, setPaid] = useState(false);
   const [pending, start] = useTransition();
 
   // Categorias: padrão + personalizadas (do perfil) + criação ao vivo
@@ -73,6 +77,8 @@ function Modal({ customCategories, onClose }: { customCategories: Category[]; on
         occurred_on: occurredOn || undefined,
         due_date: type === 'expense' ? (dueDate || null) : null,
         subtype: subtype.trim() || null,
+        account_id: type === 'expense' ? (accountId || null) : null,
+        paid: type === 'expense' ? paid : false,
       });
       onClose();
     });
@@ -161,6 +167,28 @@ function Modal({ customCategories, onClose }: { customCategories: Category[]; on
         </div>
         <input value={subtype} onChange={(e) => setSubtype(e.target.value)} placeholder="Ou crie um tipo..."
           style={{ width: '100%', padding: '10px 14px', borderRadius: 10, background: 'var(--surface-2)', border: '1px solid var(--line)', outline: 'none', fontSize: 13, color: 'var(--ink)', marginBottom: 16 }} />
+
+        {/* Cartão vinculado + pago (só despesa) */}
+        {type === 'expense' && (
+          <>
+            <Eyebrow style={{ marginBottom: 8 }}>Cartão (opcional)</Eyebrow>
+            <select value={accountId} onChange={(e) => setAccountId(e.target.value)}
+              style={{ width: '100%', padding: '11px 14px', borderRadius: 10, background: 'var(--surface-2)', border: '1px solid var(--line)', outline: 'none', fontSize: 13, color: 'var(--ink)', marginBottom: 12 }}>
+              <option value="">Sem cartão vinculado</option>
+              {cards.map((c) => (
+                <option key={c.id} value={c.id}>{resolveBank(c.bank).name} · {c.label}</option>
+              ))}
+            </select>
+            <button type="button" onClick={() => setPaid((v) => !v)}
+              style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: 'var(--surface-2)', border: `1px solid ${paid ? 'var(--positive)' : 'var(--line)'}`, marginBottom: 16 }}>
+              <span style={{ width: 20, height: 20, borderRadius: 6, border: `1.5px solid ${paid ? 'var(--positive)' : 'var(--ink-4)'}`, background: paid ? 'var(--positive)' : 'transparent', color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {paid && <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12l5 5L20 6"/></svg>}
+              </span>
+              <span style={{ flex: 1, textAlign: 'left', fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>Marcar como pago</span>
+              {accountId && <span style={{ fontSize: 11, color: 'var(--ink-3)' }}>libera limite</span>}
+            </button>
+          </>
+        )}
 
         {/* Datas */}
         <div style={{ display: 'grid', gridTemplateColumns: type === 'expense' ? '1fr 1fr' : '1fr', gap: 12, marginBottom: 20 }}>

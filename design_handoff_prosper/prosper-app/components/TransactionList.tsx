@@ -2,9 +2,10 @@
 
 import { useState, useTransition } from 'react';
 import { motion } from 'framer-motion';
-import { deleteTransaction, updateTransaction, addCategory } from '@/lib/actions';
+import { deleteTransaction, updateTransaction, addCategory, setTransactionPaid } from '@/lib/actions';
 import { brl, parseBRL } from '@/lib/format';
-import type { Transaction } from '@/lib/types';
+import type { Transaction, Account } from '@/lib/types';
+import { resolveBank } from '@/lib/banks';
 import {
   buildCategoryMap, resolveCategory, slugify, CATEGORY_COLORS,
   DEFAULT_EXPENSE_TYPES, DEFAULT_INCOME_TYPES, type Category,
@@ -15,7 +16,7 @@ const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Jul
 const EXPENSE_CATS = ['food', 'home', 'transport', 'leisure', 'health', 'edu'];
 
 // Lista com filtro por mês/ano + exclusão. Recebe transações do servidor.
-export function TransactionList({ transactions, customCategories = [] }: { transactions: Transaction[]; customCategories?: Category[] }) {
+export function TransactionList({ transactions, customCategories = [], cards = [] }: { transactions: Transaction[]; customCategories?: Category[]; cards?: Account[] }) {
   const catMap = buildCategoryMap(customCategories);
 
   // Meses disponíveis a partir dos dados (mais recentes primeiro)
@@ -40,12 +41,12 @@ export function TransactionList({ transactions, customCategories = [] }: { trans
         <span style={{ fontSize: 12, color: 'var(--ink-3)' }}>{filtered.length} movimento{filtered.length === 1 ? '' : 's'}</span>
       </div>
 
-      <Groups transactions={filtered} catMap={catMap} customCategories={customCategories} />
+      <Groups transactions={filtered} catMap={catMap} customCategories={customCategories} cards={cards} />
     </div>
   );
 }
 
-function Groups({ transactions, catMap, customCategories }: { transactions: Transaction[]; catMap: Record<string, { name: string; color: string }>; customCategories: Category[] }) {
+function Groups({ transactions, catMap, customCategories, cards }: { transactions: Transaction[]; catMap: Record<string, { name: string; color: string }>; customCategories: Category[]; cards: Account[] }) {
   if (transactions.length === 0) {
     return (
       <div style={{ padding: '48px 0', textAlign: 'center', color: 'var(--ink-3)', fontSize: 14 }}>
@@ -67,7 +68,7 @@ function Groups({ transactions, catMap, customCategories }: { transactions: Tran
           <div className="eyebrow" style={{ marginBottom: 6 }}>{formatDate(date)}</div>
           <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--radius-lg)', padding: '2px 18px', boxShadow: 'var(--shadow-1)' }}>
             {items.map((t, i) => (
-              <Row key={t.id} t={t} last={i === items.length - 1} catMap={catMap} customCategories={customCategories} />
+              <Row key={t.id} t={t} last={i === items.length - 1} catMap={catMap} customCategories={customCategories} cards={cards} />
             ))}
           </div>
         </div>
@@ -76,11 +77,12 @@ function Groups({ transactions, catMap, customCategories }: { transactions: Tran
   );
 }
 
-function Row({ t, last, catMap, customCategories }: { t: Transaction; last: boolean; catMap: Record<string, { name: string; color: string }>; customCategories: Category[] }) {
+function Row({ t, last, catMap, customCategories, cards }: { t: Transaction; last: boolean; catMap: Record<string, { name: string; color: string }>; customCategories: Category[]; cards: Account[] }) {
   const [pending, start] = useTransition();
   const [editing, setEditing] = useState(false);
   const inc = t.amount > 0;
   const cat = resolveCategory(t.category, catMap);
+  const isPaid = !!t.paid;
   const meta = inc ? (t.subtype || 'Receita') : [cat.name, t.subtype].filter(Boolean).join(' · ');
   return (
     <div
@@ -104,9 +106,20 @@ function Row({ t, last, catMap, customCategories }: { t: Transaction; last: bool
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 14, fontWeight: 500 }}>{t.name}</div>
         <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 2 }}>
-          {meta}{t.due_date && !inc ? ` · vence ${formatShort(t.due_date)}` : ''}
+          {meta}{t.due_date && !inc ? ` · vence ${formatShort(t.due_date)}` : ''}{isPaid && !inc ? ' · pago' : ''}
         </div>
       </div>
+      {!inc && (
+        <button onClick={() => start(async () => { await setTransactionPaid(t.id, !isPaid); })} title={isPaid ? 'Pago' : 'Marcar como pago'} aria-label="Marcar como pago"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 999, fontSize: 12, fontWeight: 600,
+            background: isPaid ? 'color-mix(in oklab, var(--positive) 16%, transparent)' : 'var(--surface-2)',
+            color: isPaid ? 'var(--positive)' : 'var(--ink-3)', border: `1px solid ${isPaid ? 'var(--positive)' : 'var(--line)'}` }}>
+          <span style={{ width: 14, height: 14, borderRadius: '50%', border: `1.5px solid ${isPaid ? 'var(--positive)' : 'var(--ink-4)'}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            {isPaid && <svg width={9} height={9} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12l5 5L20 6"/></svg>}
+          </span>
+          {isPaid ? 'Pago' : 'Pagar'}
+        </button>
+      )}
       <div className="tnum" style={{ fontSize: 14, fontWeight: 600, color: inc ? 'var(--positive)' : 'var(--ink)' }}>
         {inc ? '+' : '−'}{brl(Math.abs(t.amount)).replace('−', '')}
       </div>
@@ -121,13 +134,13 @@ function Row({ t, last, catMap, customCategories }: { t: Transaction; last: bool
       >
         ✕
       </button>
-      {editing && <EditTransactionModal t={t} customCategories={customCategories} onClose={() => setEditing(false)} />}
+      {editing && <EditTransactionModal t={t} customCategories={customCategories} cards={cards} onClose={() => setEditing(false)} />}
     </div>
   );
 }
 
 // ── Modal de edição de movimento ─────────────────────────────────────────
-function EditTransactionModal({ t, customCategories, onClose }: { t: Transaction; customCategories: Category[]; onClose: () => void }) {
+function EditTransactionModal({ t, customCategories, cards, onClose }: { t: Transaction; customCategories: Category[]; cards: Account[]; onClose: () => void }) {
   const [type, setType] = useState<'expense' | 'income'>(t.amount > 0 ? 'income' : 'expense');
   const [amount, setAmount] = useState(String(Math.abs(t.amount)).replace('.', ','));
   const [name, setName] = useState(t.name);
@@ -135,6 +148,8 @@ function EditTransactionModal({ t, customCategories, onClose }: { t: Transaction
   const [occurredOn, setOccurredOn] = useState(t.occurred_on);
   const [dueDate, setDueDate] = useState(t.due_date ?? '');
   const [subtype, setSubtype] = useState(t.subtype ?? '');
+  const [accountId, setAccountId] = useState<string>(t.account_id ?? '');
+  const [paid, setPaid] = useState<boolean>(!!t.paid);
   const [pending, start] = useTransition();
 
   const [localCats, setLocalCats] = useState<Category[]>(customCategories);
@@ -168,6 +183,8 @@ function EditTransactionModal({ t, customCategories, onClose }: { t: Transaction
         occurred_on: occurredOn || undefined,
         due_date: type === 'expense' ? (dueDate || null) : null,
         subtype: subtype.trim() || null,
+        account_id: type === 'expense' ? (accountId || null) : null,
+        paid: type === 'expense' ? paid : false,
       });
       onClose();
     });
@@ -251,6 +268,28 @@ function EditTransactionModal({ t, customCategories, onClose }: { t: Transaction
         </div>
         <input value={subtype} onChange={(e) => setSubtype(e.target.value)} placeholder="Ou crie um tipo..."
           style={{ width: '100%', padding: '10px 14px', borderRadius: 10, background: 'var(--surface-2)', border: '1px solid var(--line)', outline: 'none', fontSize: 13, color: 'var(--ink)', marginBottom: 16 }} />
+
+        {/* Cartão vinculado + pago (só despesa) */}
+        {type === 'expense' && (
+          <>
+            <Eyebrow style={{ marginBottom: 8 }}>Cartão (opcional)</Eyebrow>
+            <select value={accountId} onChange={(e) => setAccountId(e.target.value)}
+              style={{ width: '100%', padding: '11px 14px', borderRadius: 10, background: 'var(--surface-2)', border: '1px solid var(--line)', outline: 'none', fontSize: 13, color: 'var(--ink)', marginBottom: 12 }}>
+              <option value="">Sem cartão vinculado</option>
+              {cards.map((c) => (
+                <option key={c.id} value={c.id}>{resolveBank(c.bank).name} · {c.label}</option>
+              ))}
+            </select>
+            <button type="button" onClick={() => setPaid((v) => !v)}
+              style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: 'var(--surface-2)', border: `1px solid ${paid ? 'var(--positive)' : 'var(--line)'}`, marginBottom: 16 }}>
+              <span style={{ width: 20, height: 20, borderRadius: 6, border: `1.5px solid ${paid ? 'var(--positive)' : 'var(--ink-4)'}`, background: paid ? 'var(--positive)' : 'transparent', color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {paid && <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12l5 5L20 6"/></svg>}
+              </span>
+              <span style={{ flex: 1, textAlign: 'left', fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>Marcar como pago</span>
+              {accountId && <span style={{ fontSize: 11, color: 'var(--ink-3)' }}>libera limite do cartão</span>}
+            </button>
+          </>
+        )}
 
         <div style={{ display: 'grid', gridTemplateColumns: type === 'expense' ? '1fr 1fr' : '1fr', gap: 12, marginBottom: 20 }}>
           <div>
