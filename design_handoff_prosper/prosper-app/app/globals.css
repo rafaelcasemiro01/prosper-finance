@@ -165,9 +165,9 @@ input, textarea, select { font: inherit; }
 .nav-link {
   display: flex; align-items: center; gap: 11px; padding: 10px 12px; border-radius: 10px;
   font-size: 13.5px; font-weight: 500; color: var(--ink-2);
-  border: 1px solid transparent; transition: background .15s ease, color .15s ease;
+  border: 1px solid transparent; transition: background .15s ease, color .15s ease, transform .12s ease;
 }
-.nav-link:hover { background: var(--surface-2); color: var(--ink); }
+.nav-link:hover { background: var(--surface-2); color: var(--ink); transform: translateX(2px); }
 .nav-link svg { width: 18px; height: 18px; flex-shrink: 0; }
 .nav-link.is-active {
   color: var(--ink); font-weight: 600; background: var(--surface);
@@ -264,3 +264,24 @@ input, textarea, select { font: inherit; }
   .auth__brand { display: none; }
   .auth__form { padding: 28px 22px calc(28px + env(safe-area-inset-bottom)); min-height: 100dvh; }
 }
+
+/* ═════════ Lamp effect (login brand panel) ═════════ */
+.lamp { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.lamp__glow {
+  position: absolute; left: 50%; top: 0; translate: -50% -55%;
+  width: 30rem; height: 30rem; border-radius: 50%;
+  background: radial-gradient(circle, var(--highlight) 0%, transparent 62%);
+  filter: blur(56px); opacity: .55;
+}
+.lamp__line {
+  position: absolute; left: 50%; top: 0; translate: -50% 0;
+  width: 60%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--highlight), transparent);
+}
+.lamp__cone-l, .lamp__cone-r {
+  position: absolute; top: 0; height: 22rem;
+  background: conic-gradient(from 90deg at center, var(--highlight), transparent 38%);
+  opacity: .5; filter: blur(6px);
+}
+.lamp__cone-l { left: 8%; width: 42%; mask-image: linear-gradient(to right, white, transparent); }
+.lamp__cone-r { right: 8%; width: 42%; mask-image: linear-gradient(to left, white, transparent); }

@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { motion } from 'framer-motion';
 import { ThemeToggle } from './ThemeToggle';
 
 // Marca
@@ -57,12 +60,29 @@ export function AppShell({
           <Logomark />
           <span className="sidebar__brandname">Prosper</span>
         </div>
-        {NAV.map((n) => (
-          <Link key={n.href} href={n.href} className={`nav-link${active === n.href ? ' is-active' : ''}`}>
-            <NavIcon id={n.id} />
-            <span>{n.label}</span>
-          </Link>
-        ))}
+        {NAV.map((n, i) => {
+          const isActive = active === n.href;
+          return (
+            <motion.div
+              key={n.href}
+              initial={{ opacity: 0, x: -14 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.05 + i * 0.05, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <Link href={n.href} className={`nav-link${isActive ? ' is-active' : ''}`} style={{ position: 'relative' }}>
+                {isActive && (
+                  <motion.span
+                    layoutId="nav-active"
+                    transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                    style={{ position: 'absolute', left: 0, top: 4, bottom: 4, width: 3, borderRadius: 999, background: 'var(--accent)' }}
+                  />
+                )}
+                <NavIcon id={n.id} />
+                <span>{n.label}</span>
+              </Link>
+            </motion.div>
+          );
+        })}
         <div style={{ marginTop: 'auto', paddingTop: 16, borderTop: '1px solid var(--line)' }}>
           <ThemeToggle />
         </div>
@@ -87,12 +107,22 @@ export function AppShell({
 
       {/* Mobile bottom nav */}
       <nav className="mobile-bottomnav">
-        {bottomItems.map((n) => (
-          <Link key={n.href} href={n.href} className={`mnav${active === n.href ? ' is-active' : ''}`}>
-            <NavIcon id={n.id} />
-            <span>{n.short}</span>
-          </Link>
-        ))}
+        {bottomItems.map((n) => {
+          const isActive = active === n.href;
+          return (
+            <Link key={n.href} href={n.href} className={`mnav${isActive ? ' is-active' : ''}`} style={{ position: 'relative' }}>
+              {isActive && (
+                <motion.span
+                  layoutId="mnav-active"
+                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                  style={{ position: 'absolute', top: 0, left: '50%', translate: '-50% 0', width: 26, height: 3, borderRadius: 999, background: 'var(--accent)' }}
+                />
+              )}
+              <NavIcon id={n.id} />
+              <span>{n.short}</span>
+            </Link>
+          );
+        })}
       </nav>
     </div>
   );

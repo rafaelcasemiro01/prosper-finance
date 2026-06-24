@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
@@ -91,26 +92,44 @@ export default function LoginPage() {
 
   return (
     <main className="auth">
-      {/* Painel de marca (desktop) */}
+      {/* Painel de marca (desktop) com efeito "lamp" */}
       <section className="auth__brand">
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Logomark size={34} color="var(--bg)" />
-          <span style={{ fontSize: 22, fontWeight: 700 }}>Prosper</span>
+        {/* Lamp: facho de luz que acende do topo */}
+        <div className="lamp" aria-hidden>
+          <motion.div className="lamp__cone-l" initial={{ opacity: 0, scaleX: 0.4 }} animate={{ opacity: 0.5, scaleX: 1 }} transition={{ delay: 0.1, duration: 0.9, ease: 'easeOut' }} style={{ transformOrigin: 'top right' }} />
+          <motion.div className="lamp__cone-r" initial={{ opacity: 0, scaleX: 0.4 }} animate={{ opacity: 0.5, scaleX: 1 }} transition={{ delay: 0.1, duration: 0.9, ease: 'easeOut' }} style={{ transformOrigin: 'top left' }} />
+          <motion.div className="lamp__line" initial={{ opacity: 0, scaleX: 0.2 }} animate={{ opacity: 1, scaleX: 1 }} transition={{ delay: 0.35, duration: 0.8, ease: 'easeOut' }} />
+          <motion.div className="lamp__glow" initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 0.55, scale: 1 }} transition={{ delay: 0.3, duration: 1, ease: 'easeOut' }} />
         </div>
 
-        <div style={{ position: 'relative', maxWidth: 460 }}>
-          <h1 style={{ fontSize: 'clamp(34px, 4vw, 52px)', lineHeight: 1.05, fontWeight: 700, letterSpacing: '-0.025em', margin: '0 0 28px' }}>
+        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 12, zIndex: 1 }}>
+          <Logomark size={34} color="var(--bg)" />
+          <span style={{ fontSize: 22, fontWeight: 700 }}>Prosper</span>
+        </motion.div>
+
+        <div style={{ position: 'relative', maxWidth: 460, zIndex: 1 }}>
+          <motion.h1
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            style={{ fontSize: 'clamp(34px, 4vw, 52px)', lineHeight: 1.05, fontWeight: 700, letterSpacing: '-0.025em', margin: '0 0 28px' }}
+          >
             Sua grana no controle, <span style={{ color: 'var(--highlight)' }}>sem complicação</span>.
-          </h1>
-          {VALUE_PROPS.map((v) => (
-            <div className="auth__valueprop" key={v}>
+          </motion.h1>
+          {VALUE_PROPS.map((v, i) => (
+            <motion.div
+              className="auth__valueprop" key={v}
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.7 + i * 0.12, duration: 0.5 }}
+            >
               <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12l5 5L20 6" /></svg>
               <span style={{ fontSize: 15, lineHeight: 1.5, color: 'color-mix(in oklab, var(--bg) 85%, transparent)' }}>{v}</span>
-            </div>
+            </motion.div>
           ))}
         </div>
 
-        <div style={{ position: 'relative', fontSize: 12, color: 'color-mix(in oklab, var(--bg) 72%, transparent)', letterSpacing: '0.04em' }}>
+        <div style={{ position: 'relative', fontSize: 12, color: 'color-mix(in oklab, var(--bg) 72%, transparent)', letterSpacing: '0.04em', zIndex: 1 }}>
           EST. 2026 · Seus dados protegidos com criptografia
         </div>
       </section>
