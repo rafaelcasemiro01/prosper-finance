@@ -179,13 +179,16 @@ export async function addAccount(input: {
   value: number;          // saldo / valor do empréstimo / (cartão: limite total)
   used?: number;          // cartão: limite utilizado
   due?: string | null;    // cartão: vencimento (dd/mm)
+  total?: number;         // empréstimo: total de parcelas
+  paid?: number;          // empréstimo: parcelas pagas
+  installment?: number;   // empréstimo: valor da parcela
   label?: string;
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Não autenticado');
 
-  const { bank, kind, value, used, due, label } = input;
+  const { bank, kind, value, used, due, total, paid, installment, label } = input;
 
   // Bloqueia banco duplicado para o mesmo tipo (ex.: duas "contas" no Nubank).
   const { data: existing } = await supabase
@@ -198,7 +201,10 @@ export async function addAccount(input: {
   if (kind === 'conta') row = { ...row, label: label || 'Conta corrente', balance: value };
   else if (kind === 'investimento') row = { ...row, label: label || 'Investimentos', balance: value };
   else if (kind === 'cartao') row = { ...row, label: label || 'Cartão de crédito', credit_limit: value, used: used ?? 0, due: due ?? null };
-  else if (kind === 'emprestimo') row = { ...row, label: label || 'Empréstimo pessoal', outstanding: value, installment: Math.round(value / 12), paid: 0, total: 12 };
+  else if (kind === 'emprestimo') {
+    const totalN = total && total > 0 ? total : 12;
+    row = { ...row, label: label || 'Empréstimo pessoal', outstanding: value, installment: installment && installment > 0 ? installment : Math.round((value / totalN) * 100) / 100, paid: paid ?? 0, total: totalN };
+  }
 
   const { error } = await supabase.from('accounts').insert(row);
   if (error) throw error;

@@ -261,11 +261,18 @@ function OperationModal({ account, onClose }: { account?: Account; onClose: () =
   const [value, setValue] = useState(baseValue != null ? String(baseValue).replace('.', ',') : '');
   const [used, setUsed] = useState(account?.used != null ? String(account.used).replace('.', ',') : '');
   const [due, setDue] = useState(account?.due ?? '');
+  const [total, setTotal] = useState(account?.total != null ? String(account.total) : '');
+  const [paidCount, setPaidCount] = useState(account?.paid != null ? String(account.paid) : '0');
+  const [installment, setInstallment] = useState(account?.installment != null ? String(account.installment).replace('.', ',') : '');
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
   const num = parseBRL(value);
   const usedNum = parseBRL(used);
+  const totalNum = Math.max(0, Math.round(Number(total) || 0));
+  const paidNum = Math.max(0, Math.min(totalNum || 999, Math.round(Number(paidCount) || 0)));
+  // Parcela: usa o valor digitado, ou calcula (saldo / nº de parcelas).
+  const installmentNum = parseBRL(installment) || (totalNum ? Math.round((num / totalNum) * 100) / 100 : 0);
   const resolvedBank = bank === '__other__' ? (otherBank.trim() ? `custom:${otherBank.trim()}` : '') : bank;
   const canSave = num > 0 && !!resolvedBank;
 
@@ -279,11 +286,11 @@ function OperationModal({ account, onClose }: { account?: Account; onClose: () =
         if (editing) {
           const patch: Record<string, unknown> = {};
           if (kind === 'cartao') { patch.credit_limit = num; patch.used = usedNum; patch.due = due || null; }
-          else if (kind === 'emprestimo') { patch.outstanding = num; }
+          else if (kind === 'emprestimo') { patch.outstanding = num; patch.total = totalNum; patch.paid = paidNum; patch.installment = installmentNum; }
           else { patch.balance = num; }
           await updateAccount(account!.id, patch);
         } else {
-          await addAccount({ bank: resolvedBank, kind, value: num, used: usedNum, due: due || null });
+          await addAccount({ bank: resolvedBank, kind, value: num, used: usedNum, due: due || null, total: totalNum || undefined, paid: paidNum, installment: installmentNum || undefined });
         }
         onClose();
       } catch (e: any) {
@@ -337,11 +344,37 @@ function OperationModal({ account, onClose }: { account?: Account; onClose: () =
 
         {/* Valor principal */}
         <Eyebrow style={{ marginBottom: 8 }}>{valueLabel}</Eyebrow>
-        <div style={{ ...fieldBox(), marginBottom: kind === 'cartao' ? 14 : 22 }}>
+        <div style={{ ...fieldBox(), marginBottom: (kind === 'conta' || kind === 'investimento') ? 22 : 14 }}>
           <span style={{ color: 'var(--ink-3)' }}>R$</span>
           <input value={value} onChange={(e) => setValue(e.target.value)} inputMode="decimal" placeholder="0,00" autoFocus={editing}
             style={{ flex: 1, border: 'none', background: 'none', outline: 'none', fontSize: 18, fontWeight: 600, color: 'var(--ink)' }} />
         </div>
+
+        {/* Campos extras do empréstimo */}
+        {kind === 'emprestimo' && (
+          <>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
+              <div style={{ minWidth: 0 }}>
+                <Eyebrow style={{ marginBottom: 8 }}>Total de parcelas</Eyebrow>
+                <input value={total} onChange={(e) => setTotal(e.target.value.replace(/[^0-9]/g, '').slice(0, 3))} inputMode="numeric" placeholder="12"
+                  style={{ width: '100%', padding: '11px 14px', borderRadius: 12, background: 'var(--surface-2)', border: '1px solid var(--line)', outline: 'none', fontSize: 15, fontWeight: 600, color: 'var(--ink)' }} />
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <Eyebrow style={{ marginBottom: 8 }}>Parcelas pagas</Eyebrow>
+                <input value={paidCount} onChange={(e) => setPaidCount(e.target.value.replace(/[^0-9]/g, '').slice(0, 3))} inputMode="numeric" placeholder="0"
+                  style={{ width: '100%', padding: '11px 14px', borderRadius: 12, background: 'var(--surface-2)', border: '1px solid var(--line)', outline: 'none', fontSize: 15, fontWeight: 600, color: 'var(--ink)' }} />
+              </div>
+            </div>
+            <div style={{ marginBottom: 22 }}>
+              <Eyebrow style={{ marginBottom: 8 }}>Valor da parcela <span style={{ textTransform: 'none', letterSpacing: 0, color: 'var(--ink-3)', fontWeight: 400 }}>(opcional — calcula sozinho)</span></Eyebrow>
+              <div style={fieldBox()}>
+                <span style={{ color: 'var(--ink-3)' }}>R$</span>
+                <input value={installment} onChange={(e) => setInstallment(e.target.value)} inputMode="decimal" placeholder={totalNum ? brl(num / totalNum).replace('R$ ', '') : '0,00'}
+                  style={{ flex: 1, minWidth: 0, width: '100%', border: 'none', background: 'none', outline: 'none', fontSize: 15, fontWeight: 600, color: 'var(--ink)' }} />
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Campos extras do cartão */}
         {kind === 'cartao' && (
