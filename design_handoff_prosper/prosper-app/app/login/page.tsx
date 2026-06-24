@@ -92,14 +92,11 @@ export default function LoginPage() {
 
   return (
     <main className="auth">
-      {/* Painel de marca (desktop) com efeito "lamp" */}
+      {/* Painel de marca (desktop) — navy sólido com uma luz no topo */}
       <section className="auth__brand">
-        {/* Lamp: facho de luz que acende do topo */}
         <div className="lamp" aria-hidden>
-          <motion.div className="lamp__cone-l" initial={{ opacity: 0, scaleX: 0.4 }} animate={{ opacity: 0.5, scaleX: 1 }} transition={{ delay: 0.1, duration: 0.9, ease: 'easeOut' }} style={{ transformOrigin: 'top right' }} />
-          <motion.div className="lamp__cone-r" initial={{ opacity: 0, scaleX: 0.4 }} animate={{ opacity: 0.5, scaleX: 1 }} transition={{ delay: 0.1, duration: 0.9, ease: 'easeOut' }} style={{ transformOrigin: 'top left' }} />
-          <motion.div className="lamp__line" initial={{ opacity: 0, scaleX: 0.2 }} animate={{ opacity: 1, scaleX: 1 }} transition={{ delay: 0.35, duration: 0.8, ease: 'easeOut' }} />
-          <motion.div className="lamp__glow" initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 0.55, scale: 1 }} transition={{ delay: 0.3, duration: 1, ease: 'easeOut' }} />
+          <motion.div className="lamp__line" initial={{ opacity: 0, scaleX: 0.2 }} animate={{ opacity: 1, scaleX: 1 }} transition={{ delay: 0.2, duration: 0.8, ease: 'easeOut' }} />
+          <motion.div className="lamp__glow" initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 0.5, scale: 1 }} transition={{ delay: 0.25, duration: 0.9, ease: 'easeOut' }} />
         </div>
 
         <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 12, zIndex: 1 }}>

@@ -41,6 +41,27 @@ export async function deleteTransaction(id: string) {
   revalidatePath('/transactions');
 }
 
+// Edita um movimento existente (valor, nome, categoria, datas, tipo).
+export async function updateTransaction(id: string, input: {
+  amount: number; name: string; category: string;
+  occurred_on?: string; due_date?: string | null; subtype?: string | null;
+}) {
+  const supabase = await createClient();
+  const isIncome = input.amount > 0;
+  const { error } = await supabase.from('transactions').update({
+    amount: input.amount,
+    name: input.name,
+    category: isIncome ? 'income' : input.category,
+    type: isIncome ? 'income' : 'expense',
+    occurred_on: input.occurred_on || undefined,
+    due_date: isIncome ? null : (input.due_date || null),
+    subtype: input.subtype || null,
+  }).eq('id', id);
+  if (error) throw error;
+  revalidatePath('/dashboard');
+  revalidatePath('/transactions');
+}
+
 // Cria uma categoria personalizada no perfil do usuário (JSONB).
 export async function addCategory(input: { name: string; slug: string; color: string }) {
   const supabase = await createClient();
