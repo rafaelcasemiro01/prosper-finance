@@ -37,6 +37,12 @@ export function AccountsBoard({ accounts }: { accounts: Account[] }) {
           </AccountRow>
         ))}
         {contas.length === 0 && <Empty />}
+        {contas.length > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0 12px', borderTop: '1px solid var(--line)', marginTop: 2 }}>
+            <span className="eyebrow">Total em contas</span>
+            <TotalItem label="Saldo" value={brl(contas.reduce((s, a) => s + (a.balance ?? 0), 0))} color="var(--positive)" />
+          </div>
+        )}
       </ListSection>
 
       <ListSection label="Cartões de crédito">
@@ -74,21 +80,19 @@ export function AccountsBoard({ accounts }: { accounts: Account[] }) {
       </ListSection>
 
       <ListSection label="Empréstimos">
-        {emprestimos.map((a) => {
-          const pct = a.total ? ((a.paid ?? 0) / a.total) * 100 : 0;
-          return (
-            <AccountRow key={a.id} a={a} onEdit={() => setEdit(a)} sub={`Parcela ${brl(a.installment ?? 0)}/mês`}>
-              <div style={{ minWidth: 150 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 5 }}>
-                  <span style={{ color: 'var(--ink-2)' }}>{a.paid ?? 0}/{a.total ?? 0} pagas</span>
-                  <span style={{ color: 'var(--ink-3)' }}>resta {brl(a.outstanding ?? 0)}</span>
-                </div>
-                <ProgressBar pct={pct} height={4} color="var(--positive)" />
-              </div>
-            </AccountRow>
-          );
-        })}
+        {emprestimos.map((a) => (
+          <LoanRow key={a.id} a={a} onEdit={() => setEdit(a)} />
+        ))}
         {emprestimos.length === 0 && <Empty />}
+        {emprestimos.length > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0 12px', borderTop: '1px solid var(--line)', marginTop: 2 }}>
+            <span className="eyebrow">Total dos empréstimos</span>
+            <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+              <TotalItem label="Parcela/mês" value={brl(emprestimos.reduce((s, a) => s + (a.installment ?? 0), 0))} />
+              <TotalItem label="Saldo devedor" value={brl(emprestimos.reduce((s, a) => s + (a.outstanding ?? 0), 0))} color="var(--negative)" />
+            </div>
+          </div>
+        )}
       </ListSection>
 
       {open && <OperationModal onClose={() => setOpen(false)} />}
@@ -135,6 +139,100 @@ function AccountRow({ a, sub, children, onEdit }: { a: Account; sub?: string; ch
       </button>
       <button onClick={() => start(async () => { await deleteAccount(a.id); })} aria-label="Remover" style={{ background: 'none', border: 'none', color: 'var(--ink-3)', fontSize: 15, padding: 6 }}>✕</button>
     </div>
+  );
+}
+
+// Linha de empréstimo com progresso de parcelas + ações (pagar parcela / amortizar).
+function LoanRow({ a, onEdit }: { a: Account; onEdit: () => void }) {
+  const [pending, start] = useTransition();
+  const [amortizing, setAmortizing] = useState(false);
+  const b = resolveBank(a.bank);
+  const total = a.total ?? 0;
+  const paidCount = a.paid ?? 0;
+  const installment = a.installment ?? 0;
+  const outstanding = a.outstanding ?? 0;
+  const pct = total ? (paidCount / total) * 100 : 0;
+
+  function payInstallment() {
+    if (paidCount >= total && total > 0) return;
+    start(async () => {
+      await updateAccount(a.id, {
+        paid: Math.min(total || paidCount + 1, paidCount + 1),
+        outstanding: Math.max(0, outstanding - installment),
+      });
+    });
+  }
+
+  return (
+    <div style={{ padding: '14px 0', borderBottom: '1px solid var(--line-soft)', opacity: pending ? 0.5 : 1 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <BankBadge bank={a.bank} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 14, fontWeight: 600 }}>{b.name}</div>
+          <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 2 }}>{a.label} · Parcela {brl(installment)}/mês</div>
+        </div>
+        <div style={{ minWidth: 150 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 5 }}>
+            <span style={{ color: 'var(--ink-2)' }}>{paidCount}/{total} pagas</span>
+            <span style={{ color: 'var(--ink-3)' }}>resta {brl(outstanding)}</span>
+          </div>
+          <ProgressBar pct={pct} height={4} color="var(--positive)" />
+        </div>
+        <button onClick={onEdit} aria-label="Editar" title="Editar" style={{ background: 'none', border: '1px solid var(--line)', borderRadius: 8, color: 'var(--ink-2)', width: 30, height: 30, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M13.5 6.5l3 3"/></svg>
+        </button>
+        <button onClick={() => start(async () => { await deleteAccount(a.id); })} aria-label="Remover" style={{ background: 'none', border: 'none', color: 'var(--ink-3)', fontSize: 15, padding: 6 }}>✕</button>
+      </div>
+      {/* Ações */}
+      <div style={{ display: 'flex', gap: 8, marginTop: 12, paddingLeft: 58, flexWrap: 'wrap' }}>
+        <button onClick={payInstallment} disabled={outstanding <= 0}
+          style={{ padding: '7px 14px', borderRadius: 999, fontSize: 12, fontWeight: 600, background: 'var(--ink)', color: 'var(--bg)', border: 'none', opacity: outstanding <= 0 ? 0.4 : 1 }}>
+          Pagar parcela
+        </button>
+        <button onClick={() => setAmortizing(true)} disabled={outstanding <= 0}
+          style={{ padding: '7px 14px', borderRadius: 999, fontSize: 12, fontWeight: 600, background: 'var(--surface-2)', color: 'var(--ink)', border: '1px solid var(--line)', opacity: outstanding <= 0 ? 0.4 : 1 }}>
+          Amortizar
+        </button>
+        {outstanding <= 0 && <span style={{ fontSize: 12, color: 'var(--positive)', fontWeight: 600, alignSelf: 'center' }}>Quitado 🎉</span>}
+      </div>
+      {amortizing && <AmortizeModal a={a} onClose={() => setAmortizing(false)} />}
+    </div>
+  );
+}
+
+// Amortização: abate um valor extra do saldo devedor.
+function AmortizeModal({ a, onClose }: { a: Account; onClose: () => void }) {
+  const [value, setValue] = useState('');
+  const [pending, start] = useTransition();
+  const outstanding = a.outstanding ?? 0;
+  const num = parseBRL(value);
+  const after = Math.max(0, outstanding - num);
+  const canSave = num > 0 && num <= outstanding;
+
+  return (
+    <motion.div onClick={onClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.18 }}
+      style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(10,14,22,.5)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <motion.div onClick={(e) => e.stopPropagation()} initial={{ opacity: 0, scale: 0.94, y: 14 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ type: 'spring', stiffness: 320, damping: 26 }}
+        style={{ background: 'var(--surface)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--line)', boxShadow: 'var(--shadow-2)', padding: 28, width: 420, maxWidth: '100%' }}>
+        <h2 style={{ margin: '0 0 6px', fontSize: 22, fontWeight: 700 }}>Amortizar empréstimo</h2>
+        <p style={{ margin: '0 0 18px', fontSize: 13, color: 'var(--ink-3)' }}>Abata um valor extra do saldo devedor de {resolveBank(a.bank).name}.</p>
+
+        <Eyebrow style={{ marginBottom: 8 }}>Valor da amortização</Eyebrow>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', borderRadius: 12, background: 'var(--surface-2)', border: '1px solid var(--line)', marginBottom: 16 }}>
+          <span style={{ color: 'var(--ink-3)', fontSize: 18 }}>R$</span>
+          <input value={value} onChange={(e) => setValue(e.target.value)} inputMode="decimal" placeholder="0,00" autoFocus
+            style={{ flex: 1, border: 'none', background: 'none', outline: 'none', fontSize: 20, fontWeight: 700, color: 'var(--ink)' }} />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 22 }}>
+          <span style={{ color: 'var(--ink-3)' }}>Saldo devedor após</span>
+          <span className="tnum" style={{ color: 'var(--positive)', fontWeight: 700 }}>{brl(after)}</span>
+        </div>
+
+        <Button full onClick={() => start(async () => { await updateAccount(a.id, { outstanding: after }); onClose(); })} style={{ opacity: canSave && !pending ? 1 : 0.45 }}>
+          {pending ? 'Amortizando...' : 'Confirmar amortização'}
+        </Button>
+      </motion.div>
+    </motion.div>
   );
 }
 

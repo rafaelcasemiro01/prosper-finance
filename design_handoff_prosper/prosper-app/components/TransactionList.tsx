@@ -22,23 +22,81 @@ export function TransactionList({ transactions, customCategories = [], cards = [
   // Meses disponíveis a partir dos dados (mais recentes primeiro)
   const monthKeys = Array.from(new Set(transactions.map((t) => t.occurred_on.slice(0, 7)))).sort().reverse();
   const [month, setMonth] = useState<string>('all');
+  const [kind, setKind] = useState<'all' | 'income' | 'expense'>('all');
+  const [cat, setCat] = useState<string>('all');
+  const [status, setStatus] = useState<'all' | 'paid' | 'pending'>('all');
+  const [query, setQuery] = useState('');
 
-  const filtered = month === 'all' ? transactions : transactions.filter((t) => t.occurred_on.startsWith(month));
+  // Categorias presentes nas despesas (para o seletor)
+  const usedCats = Array.from(new Set(transactions.filter((t) => t.amount < 0).map((t) => t.category)));
+
+  const q = query.trim().toLowerCase();
+  const filtered = transactions.filter((t) => {
+    if (month !== 'all' && !t.occurred_on.startsWith(month)) return false;
+    if (kind === 'income' && t.amount <= 0) return false;
+    if (kind === 'expense' && t.amount >= 0) return false;
+    if (cat !== 'all' && t.category !== cat) return false;
+    if (status === 'paid' && !t.paid) return false;
+    if (status === 'pending' && (t.paid || t.amount > 0)) return false;
+    if (q) {
+      const hay = `${t.name} ${t.subtype ?? ''} ${resolveCategory(t.category, catMap).name}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  const totalIn = filtered.filter((t) => t.amount > 0).reduce((s, t) => s + t.amount, 0);
+  const totalOut = filtered.filter((t) => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
+  const hasActiveFilter = month !== 'all' || kind !== 'all' || cat !== 'all' || status !== 'all' || !!q;
+
+  const selStyle: React.CSSProperties = { padding: '8px 12px', borderRadius: 999, background: 'var(--surface)', border: '1px solid var(--line)', color: 'var(--ink)', fontSize: 13, fontWeight: 600, outline: 'none', cursor: 'pointer' };
 
   return (
     <div>
-      {/* Filtro de mês/ano */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 18 }}>
-        <span className="eyebrow">Filtrar por período</span>
-        <select value={month} onChange={(e) => setMonth(e.target.value)}
-          style={{ padding: '8px 14px', borderRadius: 999, background: 'var(--surface)', border: '1px solid var(--line)', color: 'var(--ink)', fontSize: 13, fontWeight: 600, outline: 'none', cursor: 'pointer' }}>
+      {/* Busca */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 999, background: 'var(--surface)', border: '1px solid var(--line)', marginBottom: 12 }}>
+        <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" strokeWidth="1.8" strokeLinecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar por nome, tipo ou categoria..."
+          style={{ flex: 1, border: 'none', background: 'none', outline: 'none', fontSize: 14, color: 'var(--ink)' }} />
+        {query && <button onClick={() => setQuery('')} style={{ background: 'none', border: 'none', color: 'var(--ink-3)', fontSize: 16 }}>✕</button>}
+      </div>
+
+      {/* Filtros */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
+        <select value={month} onChange={(e) => setMonth(e.target.value)} style={selStyle} aria-label="Período">
           <option value="all">Todos os períodos</option>
           {monthKeys.map((k) => {
             const [y, m] = k.split('-');
             return <option key={k} value={k}>{MONTHS[Number(m) - 1]} de {y}</option>;
           })}
         </select>
-        <span style={{ fontSize: 12, color: 'var(--ink-3)' }}>{filtered.length} movimento{filtered.length === 1 ? '' : 's'}</span>
+        <select value={kind} onChange={(e) => setKind(e.target.value as any)} style={selStyle} aria-label="Tipo">
+          <option value="all">Receitas e despesas</option>
+          <option value="income">Só receitas</option>
+          <option value="expense">Só despesas</option>
+        </select>
+        <select value={cat} onChange={(e) => setCat(e.target.value)} style={selStyle} aria-label="Categoria">
+          <option value="all">Todas as categorias</option>
+          {usedCats.map((c) => <option key={c} value={c}>{resolveCategory(c, catMap).name}</option>)}
+        </select>
+        <select value={status} onChange={(e) => setStatus(e.target.value as any)} style={selStyle} aria-label="Status">
+          <option value="all">Pagos e pendentes</option>
+          <option value="pending">Só pendentes</option>
+          <option value="paid">Só pagos</option>
+        </select>
+        {hasActiveFilter && (
+          <button onClick={() => { setMonth('all'); setKind('all'); setCat('all'); setStatus('all'); setQuery(''); }}
+            style={{ padding: '8px 14px', borderRadius: 999, background: 'transparent', border: '1px solid var(--line)', color: 'var(--accent)', fontSize: 13, fontWeight: 600 }}>
+            Limpar filtros
+          </button>
+        )}
+      </div>
+
+      {/* Resumo do resultado filtrado */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', marginBottom: 18, fontSize: 12, color: 'var(--ink-3)' }}>
+        <span>{filtered.length} movimento{filtered.length === 1 ? '' : 's'}</span>
+        {totalIn > 0 && <span style={{ color: 'var(--positive)', fontWeight: 600 }}>+{brl(totalIn)}</span>}
+        {totalOut > 0 && <span style={{ color: 'var(--negative)', fontWeight: 600 }}>−{brl(totalOut)}</span>}
       </div>
 
       <Groups transactions={filtered} catMap={catMap} customCategories={customCategories} cards={cards} />
