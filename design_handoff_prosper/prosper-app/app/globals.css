@@ -223,7 +223,8 @@ input, textarea, select { font: inherit; }
 }
 
 /* ═════════ Auth (login / cadastro) ═════════ */
-.auth { display: flex; min-height: 100vh; min-height: 100dvh; }
+.auth { display: flex; min-height: 100vh; min-height: 100dvh; background: var(--bg); position: relative; z-index: 0; isolation: isolate; }
+.auth__form { background: var(--bg); }
 .auth__brand {
   flex: 1.1; position: relative; overflow: hidden;
   background: linear-gradient(150deg, var(--ink) 0%, color-mix(in oklab, var(--ink) 82%, var(--accent)) 100%);
