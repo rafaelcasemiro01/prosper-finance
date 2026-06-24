@@ -2,27 +2,39 @@ import { AppShell } from '@/components/AppShell';
 import { Card, Eyebrow, ProgressBar } from '@/components/ui';
 import { NewTransactionForm } from '@/components/NewTransactionForm';
 import { AnimatedNumber } from '@/components/AnimatedNumber';
+import { CardReminders } from '@/components/CardReminders';
 import {
-  getProfile, getBalanceTotal, getMonthSummary, getGoals, getTransactions,
+  getProfile, getBalanceTotal, getMonthSummary, getGoals, getTransactions, getAccounts, getCustomCategories,
 } from '@/lib/queries';
 import { brl } from '@/lib/format';
-import { CATEGORIES } from '@/lib/types';
+import { buildCategoryMap, resolveCategory } from '@/lib/categories';
 
 // Server Component — reads live, RLS-scoped data from Supabase.
 export default async function DashboardPage() {
-  const [profile, total, month, goals, transactions] = await Promise.all([
+  const [profile, total, month, goals, transactions, accounts, customCategories] = await Promise.all([
     getProfile(),
     getBalanceTotal(),
     getMonthSummary(),
     getGoals(),
     getTransactions(),
+    getAccounts(),
+    getCustomCategories(),
   ]);
 
   const featured = goals[0];
   const goalPct = featured ? (featured.current / featured.target) * 100 : 0;
   const recent = transactions.slice(0, 6);
-  const available = total - (profile?.invested ?? 0);
+  const catMap = buildCategoryMap(customCategories);
   const firstName = (profile?.full_name || 'você').split(' ')[0];
+
+  // Derivados das Contas & Cartões
+  const saldoEmContas = accounts
+    .filter((a) => a.kind === 'conta' || a.kind === 'investimento')
+    .reduce((s, a) => s + (a.balance ?? 0), 0);
+  const faturasAbertas = accounts
+    .filter((a) => a.kind === 'cartao')
+    .reduce((s, a) => s + (a.used ?? 0), 0);
+  const cartoes = accounts.filter((a) => a.kind === 'cartao' && a.due);
 
   return (
     <AppShell active="/dashboard" width="wide">
@@ -31,8 +43,11 @@ export default async function DashboardPage() {
           <Eyebrow>Boa noite</Eyebrow>
           <h1 className="h-page" style={{ margin: '6px 0 0' }}>Olá, {firstName}</h1>
         </div>
-        <NewTransactionForm />
+        <NewTransactionForm customCategories={customCategories} />
       </div>
+
+      {/* Lembretes de vencimento de cartão */}
+      <CardReminders cards={cartoes.map((c) => ({ id: c.id, bank: c.bank, due: c.due!, used: c.used ?? 0 }))} />
 
       <div className="grid grid-hero" style={{ marginBottom: 16 }}>
         {/* Hero balance */}
@@ -53,7 +68,7 @@ export default async function DashboardPage() {
               borderTop: '1px solid color-mix(in oklab, var(--bg) 16%, transparent)',
             }}
           >
-            <Stat label="Disponível" value={brl(available)} />
+            <Stat label="Saldo atual em contas" value={brl(saldoEmContas)} />
             <Stat label="Investido" value={brl(profile?.invested ?? 0)} />
             <Stat label="Saldo do mês" value={brl(month.net, { sign: true })} />
           </div>
@@ -62,12 +77,14 @@ export default async function DashboardPage() {
         {/* Income / expense */}
         <div className="grid" style={{ gridAutoRows: '1fr', gap: 16 }}>
           <Card className="card--hover">
-            <Eyebrow style={{ color: 'var(--positive)' }}>Receitas · mês</Eyebrow>
-            <div className="tnum" style={{ fontSize: 'clamp(28px,5vw,34px)', fontWeight: 700, marginTop: 8 }}><AnimatedNumber value={month.income} /></div>
+            <Eyebrow style={{ color: 'var(--positive)' }}>Saldo atual · contas</Eyebrow>
+            <div className="tnum" style={{ fontSize: 'clamp(28px,5vw,34px)', fontWeight: 700, marginTop: 8 }}><AnimatedNumber value={saldoEmContas} /></div>
+            <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 4 }}>Receita disponível nas suas contas</div>
           </Card>
           <Card className="card--hover">
-            <Eyebrow style={{ color: 'var(--negative)' }}>Despesas · mês</Eyebrow>
-            <div className="tnum" style={{ fontSize: 'clamp(28px,5vw,34px)', fontWeight: 700, marginTop: 8 }}><AnimatedNumber value={month.expense} /></div>
+            <Eyebrow style={{ color: 'var(--negative)' }}>Faturas em aberto</Eyebrow>
+            <div className="tnum" style={{ fontSize: 'clamp(28px,5vw,34px)', fontWeight: 700, marginTop: 8 }}><AnimatedNumber value={faturasAbertas} /></div>
+            <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 4 }}>Despesa a pagar nos cartões</div>
           </Card>
         </div>
       </div>
@@ -107,7 +124,7 @@ export default async function DashboardPage() {
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontSize: 14, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.name}</div>
                     <div style={{ fontSize: 12, color: 'var(--ink-3)' }}>
-                      {CATEGORIES[t.category]?.name ?? t.category} · {t.occurred_on}
+                      {inc ? (t.subtype || 'Receita') : resolveCategory(t.category, catMap).name} · {t.occurred_on}
                     </div>
                   </div>
                   <div className="tnum" style={{ fontSize: 14, fontWeight: 600, color: inc ? 'var(--positive)' : 'var(--ink)', whiteSpace: 'nowrap' }}>

@@ -1,16 +1,49 @@
 'use client';
 
-import { useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { deleteTransaction } from '@/lib/actions';
 import { brl } from '@/lib/format';
-import { CATEGORIES, type Transaction } from '@/lib/types';
+import type { Transaction } from '@/lib/types';
+import { buildCategoryMap, resolveCategory, type Category } from '@/lib/categories';
 
-// Client list with delete. Receives server-fetched transactions as props.
-export function TransactionList({ transactions }: { transactions: Transaction[] }) {
+const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+// Lista com filtro por mês/ano + exclusão. Recebe transações do servidor.
+export function TransactionList({ transactions, customCategories = [] }: { transactions: Transaction[]; customCategories?: Category[] }) {
+  const catMap = buildCategoryMap(customCategories);
+
+  // Meses disponíveis a partir dos dados (mais recentes primeiro)
+  const monthKeys = Array.from(new Set(transactions.map((t) => t.occurred_on.slice(0, 7)))).sort().reverse();
+  const [month, setMonth] = useState<string>('all');
+
+  const filtered = month === 'all' ? transactions : transactions.filter((t) => t.occurred_on.startsWith(month));
+
+  return (
+    <div>
+      {/* Filtro de mês/ano */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 18 }}>
+        <span className="eyebrow">Filtrar por período</span>
+        <select value={month} onChange={(e) => setMonth(e.target.value)}
+          style={{ padding: '8px 14px', borderRadius: 999, background: 'var(--surface)', border: '1px solid var(--line)', color: 'var(--ink)', fontSize: 13, fontWeight: 600, outline: 'none', cursor: 'pointer' }}>
+          <option value="all">Todos os períodos</option>
+          {monthKeys.map((k) => {
+            const [y, m] = k.split('-');
+            return <option key={k} value={k}>{MONTHS[Number(m) - 1]} de {y}</option>;
+          })}
+        </select>
+        <span style={{ fontSize: 12, color: 'var(--ink-3)' }}>{filtered.length} movimento{filtered.length === 1 ? '' : 's'}</span>
+      </div>
+
+      <Groups transactions={filtered} catMap={catMap} />
+    </div>
+  );
+}
+
+function Groups({ transactions, catMap }: { transactions: Transaction[]; catMap: Record<string, { name: string; color: string }> }) {
   if (transactions.length === 0) {
     return (
       <div style={{ padding: '48px 0', textAlign: 'center', color: 'var(--ink-3)', fontSize: 14 }}>
-        Nenhum movimento ainda. Lance sua primeira receita ou despesa.
+        Nenhum movimento neste período.
       </div>
     );
   }
@@ -28,7 +61,7 @@ export function TransactionList({ transactions }: { transactions: Transaction[] 
           <div className="eyebrow" style={{ marginBottom: 6 }}>{formatDate(date)}</div>
           <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--radius-lg)', padding: '2px 18px', boxShadow: 'var(--shadow-1)' }}>
             {items.map((t, i) => (
-              <Row key={t.id} t={t} last={i === items.length - 1} />
+              <Row key={t.id} t={t} last={i === items.length - 1} catMap={catMap} />
             ))}
           </div>
         </div>
@@ -37,9 +70,11 @@ export function TransactionList({ transactions }: { transactions: Transaction[] 
   );
 }
 
-function Row({ t, last }: { t: Transaction; last: boolean }) {
+function Row({ t, last, catMap }: { t: Transaction; last: boolean; catMap: Record<string, { name: string; color: string }> }) {
   const [pending, start] = useTransition();
   const inc = t.amount > 0;
+  const cat = resolveCategory(t.category, catMap);
+  const meta = inc ? (t.subtype || 'Receita') : [cat.name, t.subtype].filter(Boolean).join(' · ');
   return (
     <div
       style={{
@@ -57,12 +92,12 @@ function Row({ t, last }: { t: Transaction; last: boolean }) {
           color: inc ? 'var(--accent)' : 'var(--ink-2)', fontWeight: 700, fontSize: 16,
         }}
       >
-        {inc ? '↓' : (CATEGORIES[t.category]?.name?.[0] ?? '·')}
+        {inc ? '↓' : (cat.name[0] ?? '·')}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 14, fontWeight: 500 }}>{t.name}</div>
         <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 2 }}>
-          {inc ? 'Receita' : CATEGORIES[t.category]?.name ?? t.category}
+          {meta}{t.due_date && !inc ? ` · vence ${formatShort(t.due_date)}` : ''}
         </div>
       </div>
       <div className="tnum" style={{ fontSize: 14, fontWeight: 600, color: inc ? 'var(--positive)' : 'var(--ink)' }}>
@@ -77,6 +112,11 @@ function Row({ t, last }: { t: Transaction; last: boolean }) {
       </button>
     </div>
   );
+}
+
+function formatShort(iso: string): string {
+  const d = new Date(iso + 'T12:00:00');
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
 }
 
 function formatDate(iso: string): string {

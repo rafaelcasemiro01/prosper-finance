@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import type { Transaction, Goal, Account, Profile } from '@/lib/types';
+import type { Category } from '@/lib/categories';
 
 // Data access layer — all reads are RLS-scoped to the logged-in user.
 
@@ -7,6 +8,13 @@ export async function getProfile(): Promise<Profile | null> {
   const supabase = await createClient();
   const { data } = await supabase.from('profiles').select('*').single();
   return data;
+}
+
+// Categorias personalizadas do usuário (JSONB no profile).
+export async function getCustomCategories(): Promise<Category[]> {
+  const supabase = await createClient();
+  const { data } = await supabase.from('profiles').select('custom_categories').single();
+  return ((data?.custom_categories as Category[]) ?? []);
 }
 
 export async function getTransactions(): Promise<Transaction[]> {

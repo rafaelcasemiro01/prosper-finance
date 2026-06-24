@@ -15,14 +15,17 @@ export interface Profile {
   invested: number;
   biometric: boolean;
   notif: boolean;
+  custom_categories?: { slug: string; name: string; color: string }[];
 }
 
 export interface Transaction {
   id: string;
   user_id: string;
   occurred_on: string; // YYYY-MM-DD
+  due_date?: string | null; // YYYY-MM-DD (despesas: vencimento)
   name: string;
-  category: string; // 'food' | 'home' | ... | 'income'
+  category: string; // 'food' | 'home' | ... | 'income' | slug custom
+  subtype?: string | null; // ex.: 'Salário', 'Fatura de cartão de crédito'
   amount: number;   // + income, - expense
   type: TxType;
   currency: string;
@@ -58,12 +61,6 @@ export interface Account {
   total?: number | null;
 }
 
-export const CATEGORIES: Record<string, { name: string; color: string }> = {
-  food:      { name: 'Alimentação', color: '#C8A02C' },
-  home:      { name: 'Moradia',     color: '#1F8A5B' },
-  transport: { name: 'Transporte',  color: '#2E7D9A' },
-  leisure:   { name: 'Lazer',       color: '#C2542E' },
-  health:    { name: 'Saúde',       color: '#8E5B8A' },
-  edu:       { name: 'Educação',    color: '#B5862B' },
-  income:    { name: 'Receita',     color: '#1F8A5B' },
-};
+// Categorias padrão (mantidas por compatibilidade). Para o mapa completo
+// com as personalizadas, use buildCategoryMap() em lib/categories.ts.
+export { DEFAULT_CATEGORIES as CATEGORIES } from '@/lib/categories';
