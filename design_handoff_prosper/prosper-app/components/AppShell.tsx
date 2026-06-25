@@ -19,7 +19,7 @@ function Logomark({ size = 28 }: { size?: number }) {
 // Ícones de navegação (stroke 1.7)
 const Icons: Record<string, ReactNode> = {
   dashboard: <path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z" />,
-  transactions: <><path d="M7 7h13l-3-3M17 17H4l3 3" /></>,
+  transactions: <><path d="M8 4v13M8 4 5 7M8 4l3 3M16 20V7M16 20l-3-3M16 20l3-3" /></>,
   accounts: <><rect x="2.5" y="5" width="19" height="14" rx="2.5" /><path d="M2.5 9.5h19M6 15h4" /></>,
   analytics: <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />,
   goals: <><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1.2" /></>,
@@ -112,13 +112,6 @@ export function AppShell({
           const isActive = active === n.href;
           return (
             <Link key={n.href} href={n.href} className={`mnav${isActive ? ' is-active' : ''}`} style={{ position: 'relative' }}>
-              {isActive && (
-                <motion.span
-                  layoutId="mnav-active"
-                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                  style={{ position: 'absolute', top: 0, left: '50%', translate: '-50% 0', width: 26, height: 3, borderRadius: 999, background: 'var(--accent)' }}
-                />
-              )}
               <NavIcon id={n.id} />
               <span>{n.short}</span>
             </Link>
