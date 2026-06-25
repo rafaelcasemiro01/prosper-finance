@@ -55,22 +55,24 @@ async function adjustCardUsed(supabase: any, accountId: string, delta: number) {
 
 // Marca/desmarca um movimento como pago. Se vinculado a um cartão, atualiza
 // o limite utilizado (pagar fatura libera limite; desfazer devolve).
-export async function setTransactionPaid(id: string, paid: boolean) {
+export async function setTransactionPaid(id: string, paid: boolean, method?: string | null) {
   const supabase = await createClient();
   const { data: t } = await supabase.from('transactions').select('amount, paid, account_id, type').eq('id', id).single();
   if (!t) throw new Error('Movimento não encontrado');
-  if (t.paid === paid) return;
 
-  const { error } = await supabase.from('transactions').update({ paid }).eq('id', id);
+  const patch: Record<string, unknown> = { paid };
+  if (paid && method) patch.payment_method = method;
+  const { error } = await supabase.from('transactions').update(patch).eq('id', id);
   if (error) throw error;
 
-  if (t.account_id && t.type === 'expense') {
+  if (t.paid !== paid && t.account_id && t.type === 'expense') {
     // pagar => libera limite (used cai); desfazer => used volta a subir
     await adjustCardUsed(supabase, t.account_id, paid ? -Math.abs(t.amount) : Math.abs(t.amount));
   }
   revalidatePath('/dashboard');
   revalidatePath('/transactions');
   revalidatePath('/accounts');
+  revalidatePath('/analytics');
 }
 
 export async function deleteTransaction(id: string) {

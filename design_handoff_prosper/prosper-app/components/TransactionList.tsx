@@ -139,6 +139,7 @@ function Groups({ transactions, catMap, customCategories, cards }: { transaction
 function Row({ t, last, catMap, customCategories, cards }: { t: Transaction; last: boolean; catMap: Record<string, { name: string; color: string }>; customCategories: Category[]; cards: Account[] }) {
   const [pending, start] = useTransition();
   const [editing, setEditing] = useState(false);
+  const [payOpen, setPayOpen] = useState(false);
   const inc = t.amount > 0;
   const cat = resolveCategory(t.category, catMap);
   const isPaid = !!t.paid;
@@ -168,15 +169,33 @@ function Row({ t, last, catMap, customCategories, cards }: { t: Transaction; las
       </div>
       <div className="tx-actions">
         {!inc && (
-          <button onClick={() => start(async () => { await setTransactionPaid(t.id, !isPaid); })} title={isPaid ? 'Pago' : 'Marcar como pago'} aria-label="Marcar como pago"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 999, fontSize: 12, fontWeight: 600,
-              background: isPaid ? 'color-mix(in oklab, var(--positive) 16%, transparent)' : 'var(--surface-2)',
-              color: isPaid ? 'var(--positive)' : 'var(--ink-3)', border: `1px solid ${isPaid ? 'var(--positive)' : 'var(--line)'}` }}>
-            <span style={{ width: 14, height: 14, borderRadius: '50%', border: `1.5px solid ${isPaid ? 'var(--positive)' : 'var(--ink-4)'}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              {isPaid && <svg width={9} height={9} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12l5 5L20 6"/></svg>}
-            </span>
-            {isPaid ? 'Pago' : 'Pagar'}
-          </button>
+          <div style={{ position: 'relative' }}>
+            <button onClick={() => { if (isPaid) { start(async () => { await setTransactionPaid(t.id, false); }); } else { setPayOpen((v) => !v); } }} title={isPaid ? 'Pago' : 'Marcar como pago'} aria-label="Marcar como pago"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 999, fontSize: 12, fontWeight: 600,
+                background: isPaid ? 'color-mix(in oklab, var(--positive) 16%, transparent)' : 'var(--surface-2)',
+                color: isPaid ? 'var(--positive)' : 'var(--ink-3)', border: `1px solid ${isPaid ? 'var(--positive)' : 'var(--line)'}` }}>
+              <span style={{ width: 14, height: 14, borderRadius: '50%', border: `1.5px solid ${isPaid ? 'var(--positive)' : 'var(--ink-4)'}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                {isPaid && <svg width={9} height={9} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12l5 5L20 6"/></svg>}
+              </span>
+              {isPaid ? 'Pago' : 'Pagar'}
+            </button>
+            {payOpen && !isPaid && (
+              <>
+                <div onClick={() => setPayOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 30 }} />
+                <div className="anim-pop" style={{ position: 'absolute', top: '110%', right: 0, zIndex: 31, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, boxShadow: 'var(--shadow-2)', padding: 6, width: 150 }}>
+                  <div style={{ fontSize: 11, color: 'var(--ink-3)', padding: '4px 8px 6px' }}>Pagar com</div>
+                  {PAYMENT_METHODS.map((p) => (
+                    <button key={p.id} onClick={() => { setPayOpen(false); start(async () => { await setTransactionPaid(t.id, true, p.id); }); }}
+                      style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 8px', borderRadius: 8, fontSize: 13, fontWeight: 500, color: 'var(--ink)', background: 'transparent', border: 'none' }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--surface-2)')}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
         )}
         <button onClick={() => setEditing(true)} aria-label="Editar" title="Editar"
           style={{ background: 'none', border: '1px solid var(--line)', borderRadius: 8, color: 'var(--ink-2)', width: 30, height: 30, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
