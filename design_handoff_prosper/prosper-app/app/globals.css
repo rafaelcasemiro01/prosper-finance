@@ -223,7 +223,7 @@ input, textarea, select { font: inherit; }
   .grid-3, .grid-2, .grid-4, .grid-hero, .grid-split { grid-template-columns: 1fr; }
   .hide-mobile { display: none !important; }
   /* Cards de estatística com altura padronizada no mobile */
-  .dash-tile { min-height: 118px; display: flex; flex-direction: column; justify-content: center; }
+  .dash-tile { min-height: 140px; display: flex; flex-direction: column; justify-content: center; padding: 20px; }
 }
 
 @media (min-width: 861px) and (max-width: 1100px) {
