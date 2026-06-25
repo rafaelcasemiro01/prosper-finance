@@ -22,7 +22,7 @@ export default async function AccountsPage() {
 
       <div className="grid grid-4" style={{ marginBottom: 22 }}>
         <Card pad={18} className="card--hover">
-          <Eyebrow style={{ color: 'var(--positive)' }}>Em contas</Eyebrow>
+          <Eyebrow style={{ color: 'var(--positive)' }}>Saldo em conta-corrente</Eyebrow>
           <div className="tnum" style={{ fontSize: 26, fontWeight: 700, marginTop: 6 }}>{brl(inAccounts)}</div>
         </Card>
         <Card pad={18} className="card--hover">

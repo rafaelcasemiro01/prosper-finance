@@ -243,6 +243,17 @@ const KINDS: { id: AccountKind; label: string }[] = [
   { id: 'investimento', label: 'Investimento' },
 ];
 
+const LOAN_TYPES = [
+  'Empréstimo pessoal',
+  'Financiamento de imóvel',
+  'Financiamento de automóvel',
+  'Consórcio de automóvel',
+  'Consórcio de moto',
+  'Consórcio de imóvel',
+  'Crédito consignado',
+  'Outros',
+];
+
 function fieldBox(): React.CSSProperties {
   return { display: 'flex', alignItems: 'center', gap: 8, padding: '11px 14px', borderRadius: 12, background: 'var(--surface-2)', border: '1px solid var(--line)' };
 }
@@ -264,6 +275,7 @@ function OperationModal({ account, onClose }: { account?: Account; onClose: () =
   const [total, setTotal] = useState(account?.total != null ? String(account.total) : '');
   const [paidCount, setPaidCount] = useState(account?.paid != null ? String(account.paid) : '0');
   const [installment, setInstallment] = useState(account?.installment != null ? String(account.installment).replace('.', ',') : '');
+  const [loanType, setLoanType] = useState(account?.kind === 'emprestimo' && account.label ? account.label : 'Empréstimo pessoal');
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
@@ -286,11 +298,11 @@ function OperationModal({ account, onClose }: { account?: Account; onClose: () =
         if (editing) {
           const patch: Record<string, unknown> = {};
           if (kind === 'cartao') { patch.credit_limit = num; patch.used = usedNum; patch.due = due || null; }
-          else if (kind === 'emprestimo') { patch.outstanding = num; patch.total = totalNum; patch.paid = paidNum; patch.installment = installmentNum; }
+          else if (kind === 'emprestimo') { patch.outstanding = num; patch.total = totalNum; patch.paid = paidNum; patch.installment = installmentNum; patch.label = loanType; }
           else { patch.balance = num; }
           await updateAccount(account!.id, patch);
         } else {
-          await addAccount({ bank: resolvedBank, kind, value: num, used: usedNum, due: due || null, total: totalNum || undefined, paid: paidNum, installment: installmentNum || undefined });
+          await addAccount({ bank: resolvedBank, kind, value: num, used: usedNum, due: due || null, total: totalNum || undefined, paid: paidNum, installment: installmentNum || undefined, label: kind === 'emprestimo' ? loanType : undefined });
         }
         onClose();
       } catch (e: any) {
@@ -353,6 +365,13 @@ function OperationModal({ account, onClose }: { account?: Account; onClose: () =
         {/* Campos extras do empréstimo */}
         {kind === 'emprestimo' && (
           <>
+            <div style={{ marginBottom: 14 }}>
+              <Eyebrow style={{ marginBottom: 8 }}>Tipo de empréstimo</Eyebrow>
+              <select value={loanType} onChange={(e) => setLoanType(e.target.value)}
+                style={{ width: '100%', padding: '11px 14px', borderRadius: 12, background: 'var(--surface-2)', border: '1px solid var(--line)', outline: 'none', fontSize: 14, fontWeight: 600, color: 'var(--ink)', cursor: 'pointer' }}>
+                {LOAN_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
               <div style={{ minWidth: 0 }}>
                 <Eyebrow style={{ marginBottom: 8 }}>Total de parcelas</Eyebrow>

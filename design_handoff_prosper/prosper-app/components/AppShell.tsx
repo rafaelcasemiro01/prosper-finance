@@ -45,7 +45,7 @@ const NAV = [
 ];
 
 // Itens da barra inferior no mobile (5 principais)
-const BOTTOM = ['/dashboard', '/transactions', '/analytics', '/goals', '/ai'];
+const BOTTOM = ['/dashboard', '/transactions', '/accounts', '/goals', '/ai'];
 
 export function AppShell({
   active, children, width = 'wide',
