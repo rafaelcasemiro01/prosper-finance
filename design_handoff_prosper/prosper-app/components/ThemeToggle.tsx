@@ -20,7 +20,7 @@ export function ThemeToggle({ compact = false }: { compact?: boolean }) {
     document.documentElement.setAttribute('data-theme', next);
     try { localStorage.setItem('pf-theme', next); } catch {}
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', next === 'dark' ? '#0A0E16' : '#FAF8F1');
+    if (meta) meta.setAttribute('content', next === 'dark' ? '#14100C' : '#FBF6F0');
   }
 
   // Evita mismatch de hidratação
