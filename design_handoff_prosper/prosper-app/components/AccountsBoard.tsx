@@ -127,17 +127,19 @@ function AccountRow({ a, sub, children, onEdit }: { a: Account; sub?: string; ch
   const [pending, start] = useTransition();
   const b = resolveBank(a.bank);
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 0', borderBottom: '1px solid var(--line-soft)', opacity: pending ? 0.4 : 1 }}>
-      <BankBadge bank={a.bank} />
-      <div style={{ flex: 1, minWidth: 0 }}>
+    <div className="acct-row" style={{ opacity: pending ? 0.4 : 1 }}>
+      <div className="acct-badge"><BankBadge bank={a.bank} /></div>
+      <div className="acct-info">
         <div style={{ fontSize: 14, fontWeight: 600 }}>{b.name}</div>
         <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 2 }}>{a.label}{sub ? ` · ${sub}` : ''}</div>
       </div>
-      {children}
-      <button onClick={onEdit} aria-label="Editar" title="Editar" style={{ background: 'none', border: '1px solid var(--line)', borderRadius: 8, color: 'var(--ink-2)', width: 30, height: 30, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-        <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M13.5 6.5l3 3"/></svg>
-      </button>
-      <button onClick={() => start(async () => { await deleteAccount(a.id); })} aria-label="Remover" style={{ background: 'none', border: 'none', color: 'var(--ink-3)', fontSize: 15, padding: 6 }}>✕</button>
+      <div className="acct-extra">{children}</div>
+      <div className="acct-actions">
+        <button onClick={onEdit} aria-label="Editar" title="Editar" style={{ background: 'none', border: '1px solid var(--line)', borderRadius: 8, color: 'var(--ink-2)', width: 30, height: 30, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M13.5 6.5l3 3"/></svg>
+        </button>
+        <button onClick={() => start(async () => { await deleteAccount(a.id); })} aria-label="Remover" style={{ background: 'none', border: 'none', color: 'var(--ink-3)', fontSize: 15, padding: 6 }}>✕</button>
+      </div>
     </div>
   );
 }
@@ -165,23 +167,25 @@ function LoanRow({ a, onEdit }: { a: Account; onEdit: () => void }) {
 
   return (
     <div style={{ padding: '14px 0', borderBottom: '1px solid var(--line-soft)', opacity: pending ? 0.5 : 1 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-        <BankBadge bank={a.bank} />
-        <div style={{ flex: 1, minWidth: 0 }}>
+      <div className="acct-row" style={{ borderBottom: 'none', paddingBottom: 0 }}>
+        <div className="acct-badge"><BankBadge bank={a.bank} /></div>
+        <div className="acct-info">
           <div style={{ fontSize: 14, fontWeight: 600 }}>{b.name}</div>
           <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 2 }}>{a.label} · Parcela {brl(installment)}/mês</div>
         </div>
-        <div style={{ minWidth: 150 }}>
+        <div className="acct-extra">
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 5 }}>
             <span style={{ color: 'var(--ink-2)' }}>{paidCount}/{total} pagas</span>
             <span style={{ color: 'var(--ink-3)' }}>resta {brl(outstanding)}</span>
           </div>
           <ProgressBar pct={pct} height={4} color="var(--positive)" />
         </div>
-        <button onClick={onEdit} aria-label="Editar" title="Editar" style={{ background: 'none', border: '1px solid var(--line)', borderRadius: 8, color: 'var(--ink-2)', width: 30, height: 30, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-          <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M13.5 6.5l3 3"/></svg>
-        </button>
-        <button onClick={() => start(async () => { await deleteAccount(a.id); })} aria-label="Remover" style={{ background: 'none', border: 'none', color: 'var(--ink-3)', fontSize: 15, padding: 6 }}>✕</button>
+        <div className="acct-actions">
+          <button onClick={onEdit} aria-label="Editar" title="Editar" style={{ background: 'none', border: '1px solid var(--line)', borderRadius: 8, color: 'var(--ink-2)', width: 30, height: 30, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M13.5 6.5l3 3"/></svg>
+          </button>
+          <button onClick={() => start(async () => { await deleteAccount(a.id); })} aria-label="Remover" style={{ background: 'none', border: 'none', color: 'var(--ink-3)', fontSize: 15, padding: 6 }}>✕</button>
+        </div>
       </div>
       {/* Ações */}
       <div style={{ display: 'flex', gap: 8, marginTop: 12, paddingLeft: 58, flexWrap: 'wrap' }}>

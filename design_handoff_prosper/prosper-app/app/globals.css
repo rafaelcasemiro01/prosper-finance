@@ -279,3 +279,42 @@ input, textarea, select { font: inherit; }
   width: 55%; height: 2px;
   background: linear-gradient(90deg, transparent, var(--highlight), transparent);
 }
+
+/* ═════════ Linhas de conta/cartão/empréstimo (responsivas) ═════════ */
+.acct-row {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 14px 0; border-bottom: 1px solid var(--line-soft);
+}
+.acct-badge { order: 1; }
+.acct-info  { order: 2; flex: 1; min-width: 0; }
+.acct-extra { order: 3; min-width: 170px; }
+.acct-actions { order: 4; display: flex; gap: 6px; align-items: center; }
+@media (max-width: 860px) {
+  .acct-actions { order: 3; }
+  .acct-extra { order: 4; flex-basis: 100%; min-width: 0; padding-left: 56px; }
+}
+
+/* ═════════ Calculadora flutuante (FAB) ═════════ */
+.calc-fab {
+  position: fixed; right: 22px; bottom: 26px; z-index: 60;
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--accent); color: var(--accent-ink);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-2), inset 0 1px 0 var(--glass-hi);
+  border: none; transition: transform .14s ease, box-shadow .18s ease;
+}
+.calc-fab:hover { transform: translateY(-2px) scale(1.04); }
+.calc-fab:active { transform: scale(.96); }
+@media (max-width: 860px) { .calc-fab { bottom: 90px; right: 16px; } }
+
+.calc-key {
+  height: 56px; border-radius: 14px; border: 1px solid var(--line);
+  background: var(--surface-2); color: var(--ink); font-size: 20px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .1s ease, background .15s ease;
+}
+.calc-key:hover { background: color-mix(in oklab, var(--surface-2) 70%, var(--accent)); }
+.calc-key:active { transform: scale(.95); }
+.calc-key--op { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+.calc-key--eq { background: var(--accent); color: var(--accent-ink); }
+.calc-key--fn { background: transparent; color: var(--ink-2); font-size: 16px; }
