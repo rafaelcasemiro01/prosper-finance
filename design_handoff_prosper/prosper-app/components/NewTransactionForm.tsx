@@ -35,6 +35,7 @@ function Modal({ customCategories, cards, onClose }: { customCategories: Categor
   const [name, setName] = useState('');
   const [category, setCategory] = useState('food');
   const [occurredOn, setOccurredOn] = useState(todayISO());
+  const [hasDue, setHasDue] = useState(false);
   const [dueDate, setDueDate] = useState('');
   const [subtype, setSubtype] = useState('');
   const [accountId, setAccountId] = useState<string>('');
@@ -75,7 +76,7 @@ function Modal({ customCategories, cards, onClose }: { customCategories: Categor
       await addTransaction({
         amount: signed, name: name.trim(), category,
         occurred_on: occurredOn || undefined,
-        due_date: type === 'expense' ? (dueDate || null) : null,
+        due_date: type === 'expense' && hasDue ? (dueDate || null) : null,
         subtype: subtype.trim() || null,
         account_id: type === 'expense' ? (accountId || null) : null,
         paid: type === 'expense' ? paid : false,
@@ -190,21 +191,28 @@ function Modal({ customCategories, cards, onClose }: { customCategories: Categor
           </>
         )}
 
-        {/* Datas */}
-        <div style={{ display: 'grid', gridTemplateColumns: type === 'expense' ? '1fr 1fr' : '1fr', gap: 12, marginBottom: 20 }}>
-          <div>
-            <Eyebrow style={{ marginBottom: 8 }}>{type === 'expense' ? 'Data da despesa' : 'Data de entrada'}</Eyebrow>
-            <input type="date" value={occurredOn} onChange={(e) => setOccurredOn(e.target.value)}
-              style={{ width: '100%', padding: '11px 14px', borderRadius: 10, background: 'var(--surface-2)', border: '1px solid var(--line)', outline: 'none', fontSize: 13, color: 'var(--ink)' }} />
+        {/* Data + vencimento opcional */}
+        <Eyebrow style={{ marginBottom: 8 }}>{type === 'expense' ? 'Data da despesa' : 'Data de entrada'}</Eyebrow>
+        <input type="date" value={occurredOn} onChange={(e) => setOccurredOn(e.target.value)}
+          style={{ width: '100%', padding: '11px 14px', borderRadius: 10, background: 'var(--surface-2)', border: '1px solid var(--line)', outline: 'none', fontSize: 13, color: 'var(--ink)', marginBottom: type === 'expense' ? 12 : 20 }} />
+        {type === 'expense' && (
+          <div style={{ marginBottom: 20 }}>
+            <button type="button" onClick={() => setHasDue((v) => !v)}
+              style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: 'var(--surface-2)', border: `1px solid ${hasDue ? 'var(--accent)' : 'var(--line)'}` }}>
+              <span style={{ width: 20, height: 20, borderRadius: 6, border: `1.5px solid ${hasDue ? 'var(--accent)' : 'var(--ink-4)'}`, background: hasDue ? 'var(--accent)' : 'transparent', color: 'var(--accent-ink)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {hasDue && <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12l5 5L20 6"/></svg>}
+              </span>
+              <span style={{ flex: 1, textAlign: 'left', fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>É uma conta a pagar (tem vencimento)</span>
+            </button>
+            {hasDue && (
+              <div style={{ marginTop: 12 }}>
+                <Eyebrow style={{ marginBottom: 8 }}>Vencimento</Eyebrow>
+                <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
+                  style={{ width: '100%', padding: '11px 14px', borderRadius: 10, background: 'var(--surface-2)', border: '1px solid var(--line)', outline: 'none', fontSize: 13, color: 'var(--ink)' }} />
+              </div>
+            )}
           </div>
-          {type === 'expense' && (
-            <div>
-              <Eyebrow style={{ marginBottom: 8 }}>Vencimento</Eyebrow>
-              <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
-                style={{ width: '100%', padding: '11px 14px', borderRadius: 10, background: 'var(--surface-2)', border: '1px solid var(--line)', outline: 'none', fontSize: 13, color: 'var(--ink)' }} />
-            </div>
-          )}
-        </div>
+        )}
 
         {/* Description */}
         <Eyebrow style={{ marginBottom: 8 }}>Descrição</Eyebrow>

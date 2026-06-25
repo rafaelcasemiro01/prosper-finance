@@ -205,6 +205,7 @@ function EditTransactionModal({ t, customCategories, cards, onClose }: { t: Tran
   const [category, setCategory] = useState(t.category && t.category !== 'income' ? t.category : 'food');
   const [occurredOn, setOccurredOn] = useState(t.occurred_on);
   const [dueDate, setDueDate] = useState(t.due_date ?? '');
+  const [hasDue, setHasDue] = useState(!!t.due_date);
   const [subtype, setSubtype] = useState(t.subtype ?? '');
   const [accountId, setAccountId] = useState<string>(t.account_id ?? '');
   const [paid, setPaid] = useState<boolean>(!!t.paid);
@@ -239,7 +240,7 @@ function EditTransactionModal({ t, customCategories, cards, onClose }: { t: Tran
       await updateTransaction(t.id, {
         amount: signed, name: name.trim(), category,
         occurred_on: occurredOn || undefined,
-        due_date: type === 'expense' ? (dueDate || null) : null,
+        due_date: type === 'expense' && hasDue ? (dueDate || null) : null,
         subtype: subtype.trim() || null,
         account_id: type === 'expense' ? (accountId || null) : null,
         paid: type === 'expense' ? paid : false,
@@ -349,18 +350,27 @@ function EditTransactionModal({ t, customCategories, cards, onClose }: { t: Tran
           </>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: type === 'expense' ? '1fr 1fr' : '1fr', gap: 12, marginBottom: 20 }}>
-          <div>
-            <Eyebrow style={{ marginBottom: 8 }}>{type === 'expense' ? 'Data da despesa' : 'Data de entrada'}</Eyebrow>
-            <input type="date" value={occurredOn} onChange={(e) => setOccurredOn(e.target.value)}
-              style={{ width: '100%', padding: '11px 14px', borderRadius: 10, background: 'var(--surface-2)', border: '1px solid var(--line)', outline: 'none', fontSize: 13, color: 'var(--ink)' }} />
-          </div>
+        <div style={{ marginBottom: 20 }}>
+          <Eyebrow style={{ marginBottom: 8 }}>{type === 'expense' ? 'Data da despesa' : 'Data de entrada'}</Eyebrow>
+          <input type="date" value={occurredOn} onChange={(e) => setOccurredOn(e.target.value)}
+            style={{ width: '100%', padding: '11px 14px', borderRadius: 10, background: 'var(--surface-2)', border: '1px solid var(--line)', outline: 'none', fontSize: 13, color: 'var(--ink)', marginBottom: type === 'expense' ? 12 : 0 }} />
           {type === 'expense' && (
-            <div>
-              <Eyebrow style={{ marginBottom: 8 }}>Vencimento</Eyebrow>
-              <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
-                style={{ width: '100%', padding: '11px 14px', borderRadius: 10, background: 'var(--surface-2)', border: '1px solid var(--line)', outline: 'none', fontSize: 13, color: 'var(--ink)' }} />
-            </div>
+            <>
+              <button type="button" onClick={() => setHasDue((v) => !v)}
+                style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: 'var(--surface-2)', border: `1px solid ${hasDue ? 'var(--accent)' : 'var(--line)'}` }}>
+                <span style={{ width: 20, height: 20, borderRadius: 6, border: `1.5px solid ${hasDue ? 'var(--accent)' : 'var(--ink-4)'}`, background: hasDue ? 'var(--accent)' : 'transparent', color: 'var(--accent-ink)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  {hasDue && <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12l5 5L20 6"/></svg>}
+                </span>
+                <span style={{ flex: 1, textAlign: 'left', fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>É uma conta a pagar (tem vencimento)</span>
+              </button>
+              {hasDue && (
+                <div style={{ marginTop: 12 }}>
+                  <Eyebrow style={{ marginBottom: 8 }}>Vencimento</Eyebrow>
+                  <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
+                    style={{ width: '100%', padding: '11px 14px', borderRadius: 10, background: 'var(--surface-2)', border: '1px solid var(--line)', outline: 'none', fontSize: 13, color: 'var(--ink)' }} />
+                </div>
+              )}
+            </>
           )}
         </div>
 
