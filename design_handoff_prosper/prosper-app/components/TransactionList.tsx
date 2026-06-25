@@ -143,16 +143,11 @@ function Row({ t, last, catMap, customCategories, cards }: { t: Transaction; las
   const isPaid = !!t.paid;
   const meta = inc ? (t.subtype || 'Receita') : [cat.name, t.subtype].filter(Boolean).join(' · ');
   return (
-    <div
-      style={{
-        display: 'flex', alignItems: 'center', gap: 12, padding: '14px 0',
-        borderBottom: last ? 'none' : '1px solid var(--line-soft)',
-        opacity: pending ? 0.4 : 1,
-      }}
-    >
+    <div className="tx-row" style={{ borderBottom: last ? 'none' : undefined, opacity: pending ? 0.4 : 1 }}>
       <div
+        className="tx-avatar"
         style={{
-          width: 42, height: 42, borderRadius: '50%', flexShrink: 0,
+          width: 42, height: 42, borderRadius: '50%',
           background: inc ? 'var(--accent-soft)' : 'var(--surface-2)',
           border: '1px solid var(--line)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -161,37 +156,39 @@ function Row({ t, last, catMap, customCategories, cards }: { t: Transaction; las
       >
         {inc ? '↓' : (cat.name[0] ?? '·')}
       </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div className="tx-info">
         <div style={{ fontSize: 14, fontWeight: 500 }}>{t.name}</div>
         <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 2 }}>
           {meta}{t.due_date && !inc ? ` · vence ${formatShort(t.due_date)}` : ''}{isPaid && !inc ? ' · pago' : ''}
         </div>
       </div>
-      {!inc && (
-        <button onClick={() => start(async () => { await setTransactionPaid(t.id, !isPaid); })} title={isPaid ? 'Pago' : 'Marcar como pago'} aria-label="Marcar como pago"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 999, fontSize: 12, fontWeight: 600,
-            background: isPaid ? 'color-mix(in oklab, var(--positive) 16%, transparent)' : 'var(--surface-2)',
-            color: isPaid ? 'var(--positive)' : 'var(--ink-3)', border: `1px solid ${isPaid ? 'var(--positive)' : 'var(--line)'}` }}>
-          <span style={{ width: 14, height: 14, borderRadius: '50%', border: `1.5px solid ${isPaid ? 'var(--positive)' : 'var(--ink-4)'}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-            {isPaid && <svg width={9} height={9} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12l5 5L20 6"/></svg>}
-          </span>
-          {isPaid ? 'Pago' : 'Pagar'}
-        </button>
-      )}
-      <div className="tnum" style={{ fontSize: 14, fontWeight: 600, color: inc ? 'var(--positive)' : 'var(--ink)' }}>
+      <div className="tx-amount tnum" style={{ fontSize: 15, fontWeight: 700, color: inc ? 'var(--positive)' : 'var(--ink)' }}>
         {inc ? '+' : '−'}{brl(Math.abs(t.amount)).replace('−', '')}
       </div>
-      <button onClick={() => setEditing(true)} aria-label="Editar" title="Editar"
-        style={{ background: 'none', border: '1px solid var(--line)', borderRadius: 8, color: 'var(--ink-2)', width: 30, height: 30, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-        <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M13.5 6.5l3 3"/></svg>
-      </button>
-      <button
-        onClick={() => start(async () => { await deleteTransaction(t.id); })}
-        aria-label="Excluir"
-        style={{ background: 'none', border: 'none', color: 'var(--ink-3)', fontSize: 16, padding: 6 }}
-      >
-        ✕
-      </button>
+      <div className="tx-actions">
+        {!inc && (
+          <button onClick={() => start(async () => { await setTransactionPaid(t.id, !isPaid); })} title={isPaid ? 'Pago' : 'Marcar como pago'} aria-label="Marcar como pago"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 999, fontSize: 12, fontWeight: 600,
+              background: isPaid ? 'color-mix(in oklab, var(--positive) 16%, transparent)' : 'var(--surface-2)',
+              color: isPaid ? 'var(--positive)' : 'var(--ink-3)', border: `1px solid ${isPaid ? 'var(--positive)' : 'var(--line)'}` }}>
+            <span style={{ width: 14, height: 14, borderRadius: '50%', border: `1.5px solid ${isPaid ? 'var(--positive)' : 'var(--ink-4)'}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              {isPaid && <svg width={9} height={9} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12l5 5L20 6"/></svg>}
+            </span>
+            {isPaid ? 'Pago' : 'Pagar'}
+          </button>
+        )}
+        <button onClick={() => setEditing(true)} aria-label="Editar" title="Editar"
+          style={{ background: 'none', border: '1px solid var(--line)', borderRadius: 8, color: 'var(--ink-2)', width: 30, height: 30, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M13.5 6.5l3 3"/></svg>
+        </button>
+        <button
+          onClick={() => start(async () => { await deleteTransaction(t.id); })}
+          aria-label="Excluir"
+          style={{ background: 'none', border: 'none', color: 'var(--ink-3)', fontSize: 16, padding: 6 }}
+        >
+          ✕
+        </button>
+      </div>
       {editing && <EditTransactionModal t={t} customCategories={customCategories} cards={cards} onClose={() => setEditing(false)} />}
     </div>
   );

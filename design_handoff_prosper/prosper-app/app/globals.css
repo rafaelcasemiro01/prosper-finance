@@ -303,6 +303,20 @@ input, textarea, select { font: inherit; }
   .acct-extra { order: 4; flex-basis: 100%; min-width: 0; padding-left: 56px; }
 }
 
+/* ═════════ Linhas de movimento (responsivas) ═════════ */
+.tx-row {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 14px 0; border-bottom: 1px solid var(--line-soft);
+}
+.tx-row:last-child { border-bottom: none; }
+.tx-avatar { order: 1; flex-shrink: 0; }
+.tx-info { order: 2; flex: 1; min-width: 0; }
+.tx-amount { order: 3; white-space: nowrap; }
+.tx-actions { order: 4; display: flex; align-items: center; gap: 8px; }
+@media (max-width: 860px) {
+  .tx-actions { order: 5; flex-basis: 100%; justify-content: flex-end; }
+}
+
 /* ═════════ Calculadora flutuante (FAB) ═════════ */
 .calc-fab {
   position: fixed; right: 22px; bottom: 26px; z-index: 60;
