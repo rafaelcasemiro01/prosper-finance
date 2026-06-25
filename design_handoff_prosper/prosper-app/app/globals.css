@@ -2,9 +2,10 @@
   --bg: #FBF6F0; --bg-2: #F4EBE1; --surface: #FFFFFF; --surface-2: #FBF1E8;
   --ink: #2A1A0F; --ink-2: #5C4A3C; --ink-3: #8A7867; --ink-4: #CBBBAB;
   --line: #EADDCE; --line-soft: #F3E9DD;
-  --accent: #E0631A; --accent-ink: #FFFFFF; --accent-soft: #FCE3CF;
-  --highlight: #F2842E; --highlight-ink: #FFFFFF;
+  --accent: #F08A24; --accent-ink: #FFFFFF; --accent-soft: #FDE7D0;
+  --highlight: #FF9D3D; --highlight-ink: #FFFFFF;
   --positive: #1F8A5B; --negative: #C2412D; --warning: #C9711A;
+  --on-hero-sub: rgba(255,255,255,.9);
   --shadow-1: 0 1px 2px rgba(60,30,10,.04), 0 2px 8px rgba(60,30,10,.06);
   --shadow-2: 0 6px 16px rgba(60,30,10,.08), 0 20px 48px rgba(60,30,10,.12);
   --shadow-pop: 0 10px 24px rgba(60,30,10,.12), 0 28px 64px rgba(60,30,10,.16);
@@ -25,6 +26,7 @@
   --shadow-2: 0 10px 28px rgba(0,0,0,.5), 0 28px 64px rgba(0,0,0,.6);
   --shadow-pop: 0 16px 40px rgba(0,0,0,.6), 0 36px 80px rgba(0,0,0,.65);
   --glow-accent: 0 8px 34px rgba(240,138,36,.4);
+  --on-hero-sub: #4d2400;
   --glass-bg: color-mix(in oklab, var(--surface) 42%, transparent);
   --glass-border: color-mix(in oklab, #ffffff 14%, transparent);
   --glass-hi: rgba(255,255,255,.12);
@@ -36,9 +38,9 @@ html { -webkit-text-size-adjust: 100%; }
 body {
   background-color: var(--bg);
   background-image:
-    radial-gradient(50vmax 50vmax at 12% -8%, color-mix(in oklab, var(--accent) 30%, transparent), transparent 55%),
-    radial-gradient(45vmax 45vmax at 105% 12%, color-mix(in oklab, var(--highlight) 20%, transparent), transparent 55%),
-    radial-gradient(60vmax 60vmax at 85% 108%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 60%);
+    radial-gradient(48vmax 48vmax at 10% -12%, color-mix(in oklab, var(--accent) 16%, transparent), transparent 60%),
+    radial-gradient(42vmax 42vmax at 110% 6%, color-mix(in oklab, var(--highlight) 11%, transparent), transparent 60%),
+    radial-gradient(55vmax 55vmax at 92% 116%, color-mix(in oklab, var(--accent) 12%, transparent), transparent 62%);
   background-attachment: fixed;
   background-repeat: no-repeat;
   color: var(--ink);
