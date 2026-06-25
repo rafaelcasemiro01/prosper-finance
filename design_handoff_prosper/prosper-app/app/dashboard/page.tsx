@@ -2,6 +2,7 @@ import { AppShell } from '@/components/AppShell';
 import { Card, Eyebrow, ProgressBar } from '@/components/ui';
 import { NewTransactionForm } from '@/components/NewTransactionForm';
 import { AnimatedNumber } from '@/components/AnimatedNumber';
+import { Greeting } from '@/components/Greeting';
 import { CardReminders } from '@/components/CardReminders';
 import {
   getProfile, getBalanceTotal, getMonthSummary, getGoals, getTransactions, getAccounts, getCustomCategories,
@@ -39,10 +40,7 @@ export default async function DashboardPage() {
   return (
     <AppShell active="/dashboard" width="wide">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap', margin: '0 0 28px' }}>
-        <div>
-          <Eyebrow>Boa noite</Eyebrow>
-          <h1 className="h-page" style={{ margin: '6px 0 0' }}>Olá, {firstName}</h1>
-        </div>
+        <Greeting name={firstName} />
         <NewTransactionForm customCategories={customCategories} cards={accounts.filter((a) => a.kind === 'cartao')} />
       </div>
 
@@ -76,12 +74,12 @@ export default async function DashboardPage() {
 
         {/* Income / expense */}
         <div className="grid" style={{ gridAutoRows: '1fr', gap: 16 }}>
-          <Card className="card--hover">
+          <Card className="card--hover dash-tile">
             <Eyebrow style={{ color: 'var(--positive)' }}>Saldo atual · contas</Eyebrow>
             <div className="tnum" style={{ fontSize: 'clamp(28px,5vw,34px)', fontWeight: 700, marginTop: 8 }}><AnimatedNumber value={saldoEmContas} /></div>
             <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 4 }}>Receita disponível nas suas contas</div>
           </Card>
-          <Card className="card--hover">
+          <Card className="card--hover dash-tile">
             <Eyebrow style={{ color: 'var(--negative)' }}>Faturas em aberto</Eyebrow>
             <div className="tnum" style={{ fontSize: 'clamp(28px,5vw,34px)', fontWeight: 700, marginTop: 8 }}><AnimatedNumber value={faturasAbertas} /></div>
             <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 4 }}>Despesa a pagar nos cartões</div>
@@ -94,7 +92,7 @@ export default async function DashboardPage() {
         <Card className="card--hover">
           <Eyebrow>Meta destacada</Eyebrow>
           <div style={{ fontSize: 22, fontWeight: 700, marginTop: 8 }}>{featured?.name ?? 'Crie sua meta'}</div>
-          <div style={{ fontSize: 52, fontWeight: 700, color: 'var(--accent)', marginTop: 14, lineHeight: 1 }}>
+          <div style={{ fontSize: 'clamp(40px,9vw,52px)', fontWeight: 700, color: 'var(--accent)', marginTop: 12, lineHeight: 1 }}>
             {Math.round(goalPct)}%
           </div>
           <div style={{ marginTop: 14 }}>
