@@ -107,7 +107,7 @@ input, textarea, select { font: inherit; }
 .btn:active { transform: translateY(0) scale(.98); }
 .btn:disabled { opacity: .5; pointer-events: none; box-shadow: none; }
 .btn--block { width: 100%; }
-.btn--primary   { background: var(--ink); color: var(--bg); }
+.btn--primary   { background: var(--accent); color: var(--accent-ink); }
 .btn--accent    { background: var(--accent); color: var(--accent-ink); }
 .btn--secondary { background: transparent; color: var(--ink); border-color: var(--ink-4); box-shadow: none; }
 .btn--secondary:hover { background: var(--surface-2); box-shadow: none; }

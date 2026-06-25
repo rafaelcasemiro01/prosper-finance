@@ -51,9 +51,9 @@ export default async function DashboardPage() {
         {/* Hero balance */}
         <div
           style={{
-            background: 'linear-gradient(150deg, var(--ink) 0%, color-mix(in oklab, var(--ink) 86%, var(--accent)) 100%)',
-            color: 'var(--bg)', borderRadius: 'var(--radius-xl)', padding: 'clamp(24px, 4vw, 36px)',
-            minHeight: 200, boxShadow: 'var(--shadow-2)', position: 'relative', overflow: 'hidden',
+            background: 'linear-gradient(145deg, var(--accent) 0%, color-mix(in oklab, var(--accent) 78%, #7a2f00) 100%)',
+            color: '#fff', borderRadius: 'var(--radius-xl)', padding: 'clamp(24px, 4vw, 36px)',
+            minHeight: 200, boxShadow: 'var(--glow-accent), var(--shadow-2)', position: 'relative', overflow: 'hidden',
           }}
         >
           <Eyebrow style={{ color: 'var(--ink-3)' }}>Patrimônio total · BRL</Eyebrow>
