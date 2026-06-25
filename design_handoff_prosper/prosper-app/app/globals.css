@@ -110,16 +110,22 @@ input, textarea, select { font: inherit; }
 .btn:disabled { opacity: .5; pointer-events: none; box-shadow: none; }
 .btn--block { width: 100%; }
 .btn--primary, .btn--accent {
-  background: color-mix(in oklab, var(--accent) 68%, transparent);
+  background: color-mix(in oklab, var(--accent) 88%, transparent);
   -webkit-backdrop-filter: blur(14px) saturate(160%);
   backdrop-filter: blur(14px) saturate(160%);
   color: #fff;
-  border-color: color-mix(in oklab, #ffffff 28%, transparent);
-  box-shadow: var(--glow-accent), inset 0 1px 0 rgba(255,255,255,.35);
+  border-color: color-mix(in oklab, #ffffff 30%, transparent);
+  box-shadow: var(--glow-accent), inset 0 1px 0 rgba(255,255,255,.4);
 }
 .btn--primary:hover, .btn--accent:hover {
-  background: color-mix(in oklab, var(--accent) 82%, transparent);
-  box-shadow: var(--glow-accent), var(--shadow-2), inset 0 1px 0 rgba(255,255,255,.4);
+  background: var(--accent);
+  box-shadow: var(--glow-accent), var(--shadow-2), inset 0 1px 0 rgba(255,255,255,.45);
+}
+[data-theme="dark"] .btn--primary, [data-theme="dark"] .btn--accent {
+  background: color-mix(in oklab, var(--accent) 70%, transparent);
+}
+[data-theme="dark"] .btn--primary:hover, [data-theme="dark"] .btn--accent:hover {
+  background: color-mix(in oklab, var(--accent) 86%, transparent);
 }
 .btn--secondary { background: transparent; color: var(--ink); border-color: var(--ink-4); box-shadow: none; }
 .btn--secondary:hover { background: var(--surface-2); box-shadow: none; }
