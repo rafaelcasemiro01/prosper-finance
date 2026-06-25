@@ -56,20 +56,36 @@ export async function getMonthSummary(): Promise<{ income: number; expense: numb
 }
 
 export async function getCategoryBreakdown(): Promise<{ category: string; amount: number }[]> {
-  const supabase = await createClient();
-  const { data } = await supabase.rpc('category_breakdown');
-  return (data ?? []) as { category: string; amount: number }[];
-}
-
-// Despesas do mês corrente agrupadas por forma de pagamento.
-export async function getPaymentBreakdown(): Promise<{ method: string; amount: number }[]> {
   const txs = await getTransactions();
-  const now = new Date();
-  const key = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const month = latestExpenseMonth(txs);
   const totals: Record<string, number> = {};
   for (const t of txs) {
     if (t.amount >= 0) continue;
-    if (!t.occurred_on.startsWith(key)) continue;
+    if (!t.occurred_on.startsWith(month)) continue;
+    const c = t.category || 'outros';
+    totals[c] = (totals[c] ?? 0) + Math.abs(t.amount);
+  }
+  return Object.entries(totals).map(([category, amount]) => ({ category, amount })).sort((a, b) => b.amount - a.amount);
+}
+
+// Mês (YYYY-MM) mais recente que tem despesas; cai no mês atual se não houver.
+function latestExpenseMonth(txs: Transaction[]): string {
+  const months = txs.filter((t) => t.amount < 0).map((t) => t.occurred_on.slice(0, 7));
+  if (months.length === 0) {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  }
+  return months.sort().reverse()[0];
+}
+
+// Despesas agrupadas por forma de pagamento (mês com dados mais recente).
+export async function getPaymentBreakdown(): Promise<{ method: string; amount: number }[]> {
+  const txs = await getTransactions();
+  const month = latestExpenseMonth(txs);
+  const totals: Record<string, number> = {};
+  for (const t of txs) {
+    if (t.amount >= 0) continue;
+    if (!t.occurred_on.startsWith(month)) continue;
     const m = t.payment_method || 'outros';
     totals[m] = (totals[m] ?? 0) + Math.abs(t.amount);
   }

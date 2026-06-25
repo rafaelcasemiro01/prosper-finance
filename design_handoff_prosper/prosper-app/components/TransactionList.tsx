@@ -6,7 +6,7 @@ import { deleteTransaction, updateTransaction, addCategory, setTransactionPaid }
 import { brl, parseBRL } from '@/lib/format';
 import type { Transaction, Account } from '@/lib/types';
 import { resolveBank } from '@/lib/banks';
-import { PAYMENT_METHODS } from '@/lib/payments';
+import { PAYMENT_METHODS, paymentLabel } from '@/lib/payments';
 import {
   buildCategoryMap, resolveCategory, slugify, CATEGORY_COLORS,
   DEFAULT_EXPENSE_TYPES, DEFAULT_INCOME_TYPES, type Category,
@@ -161,7 +161,7 @@ function Row({ t, last, catMap, customCategories, cards }: { t: Transaction; las
       <div className="tx-info">
         <div style={{ fontSize: 14, fontWeight: 500 }}>{t.name}</div>
         <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 2 }}>
-          {meta}{t.due_date && !inc ? ` · vence ${formatShort(t.due_date)}` : ''}{isPaid && !inc ? ' · pago' : ''}
+          {meta}{t.due_date && !inc ? ` · vence ${formatShort(t.due_date)}` : ''}{isPaid && !inc ? ` · pago${t.payment_method ? ` · ${paymentLabel(t.payment_method)}` : ''}` : ''}
         </div>
       </div>
       <div className="tx-amount tnum" style={{ fontSize: 15, fontWeight: 700, color: inc ? 'var(--positive)' : 'var(--ink)' }}>

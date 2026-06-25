@@ -45,8 +45,8 @@ const NAV = [
   { href: '/settings', id: 'settings', label: 'Configurações', short: 'Config.' },
 ];
 
-// Itens da barra inferior no mobile (5 principais)
-const BOTTOM = ['/dashboard', '/transactions', '/accounts', '/goals', '/ai'];
+// Itens da barra inferior no mobile
+const BOTTOM = ['/dashboard', '/transactions', '/accounts', '/analytics', '/goals', '/ai'];
 
 export function AppShell({
   active, children, width = 'wide',
