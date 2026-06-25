@@ -49,21 +49,20 @@ export default async function DashboardPage() {
 
       <div className="grid grid-hero" style={{ marginBottom: 16 }}>
         {/* Hero balance */}
-        <div
+        <div className="card"
           style={{
-            background: 'linear-gradient(145deg, var(--accent) 0%, color-mix(in oklab, var(--accent) 78%, #7a2f00) 100%)',
-            color: '#fff', borderRadius: 'var(--radius-xl)', padding: 'clamp(24px, 4vw, 36px)',
-            minHeight: 200, boxShadow: 'var(--glow-accent), var(--shadow-2)', position: 'relative', overflow: 'hidden',
+            borderRadius: 'var(--radius-xl)', padding: 'clamp(24px, 4vw, 36px)',
+            minHeight: 200, position: 'relative', overflow: 'hidden',
           }}
         >
-          <Eyebrow style={{ color: 'var(--ink-3)' }}>Patrimônio total · BRL</Eyebrow>
-          <div className="tnum" style={{ fontSize: 'clamp(40px, 8vw, 64px)', fontWeight: 700, marginTop: 14, letterSpacing: '-0.03em', lineHeight: 1 }}>
+          <Eyebrow>Patrimônio total · BRL</Eyebrow>
+          <div className="tnum" style={{ fontSize: 'clamp(40px, 8vw, 64px)', fontWeight: 700, marginTop: 14, letterSpacing: '-0.03em', lineHeight: 1, color: 'var(--ink)' }}>
             <AnimatedNumber value={total} />
           </div>
           <div
             style={{
               marginTop: 24, paddingTop: 18, display: 'flex', gap: 24, flexWrap: 'wrap',
-              borderTop: '1px solid color-mix(in oklab, var(--bg) 16%, transparent)',
+              borderTop: '1px solid var(--line)',
             }}
           >
             <Stat label="Saldo atual em contas" value={brl(saldoEmContas)} />
@@ -146,8 +145,8 @@ export default async function DashboardPage() {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div style={{ fontSize: 11, color: 'var(--ink-3)' }}>{label}</div>
-      <div className="tnum" style={{ fontSize: 15, fontWeight: 600, marginTop: 3 }}>{value}</div>
+      <div style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 500 }}>{label}</div>
+      <div className="tnum" style={{ fontSize: 15, fontWeight: 700, marginTop: 3, color: 'var(--ink)' }}>{value}</div>
     </div>
   );
 }
