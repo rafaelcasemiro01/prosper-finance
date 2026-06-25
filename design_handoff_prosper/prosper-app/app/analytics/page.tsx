@@ -1,19 +1,22 @@
 import { AppShell } from '@/components/AppShell';
 import { Card, Eyebrow, ProgressBar } from '@/components/ui';
 import { DonutChart, BarChart } from '@/components/Charts';
-import { getMonthSummary, getCategoryBreakdown, getSixMonthSeries } from '@/lib/queries';
+import { getMonthSummary, getCategoryBreakdown, getSixMonthSeries, getPaymentBreakdown } from '@/lib/queries';
 import { brl } from '@/lib/format';
 import { CATEGORIES } from '@/lib/types';
+import { paymentLabel, PAYMENT_COLORS } from '@/lib/payments';
 
 // Server Component — derived analytics from SQL functions + transactions.
 export default async function AnalyticsPage() {
-  const [month, breakdown, series] = await Promise.all([
+  const [month, breakdown, series, payments] = await Promise.all([
     getMonthSummary(),
     getCategoryBreakdown(),
     getSixMonthSeries(),
+    getPaymentBreakdown(),
   ]);
 
   const totalSpend = breakdown.reduce((a, b) => a + b.amount, 0);
+  const totalPay = payments.reduce((a, b) => a + b.amount, 0);
   const savingsRate = month.income > 0 ? (month.net / month.income) * 100 : 0;
 
   return (
@@ -82,6 +85,40 @@ export default async function AnalyticsPage() {
           </div>
         </Card>
       </div>
+
+      {/* Comparativo por forma de pagamento */}
+      <Card pad="clamp(20px,4vw,28px)" style={{ marginTop: 16 }}>
+        <Eyebrow>Por forma de pagamento · mês</Eyebrow>
+        {payments.length > 0 ? (
+          <>
+            <div style={{ display: 'flex', height: 12, borderRadius: 999, overflow: 'hidden', marginTop: 16, marginBottom: 18, background: 'var(--surface-2)' }}>
+              {payments.map((p) => (
+                <div key={p.method} title={paymentLabel(p.method)}
+                  style={{ width: `${(p.amount / totalPay) * 100}%`, background: PAYMENT_COLORS[p.method] ?? 'var(--ink-4)' }} />
+              ))}
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
+              {payments.map((p) => {
+                const pct = totalPay ? (p.amount / totalPay) * 100 : 0;
+                const color = PAYMENT_COLORS[p.method] ?? 'var(--ink-4)';
+                return (
+                  <div key={p.method} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ width: 10, height: 10, borderRadius: 3, background: color, flexShrink: 0 }} />
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600 }}>{paymentLabel(p.method)}</div>
+                      <div className="tnum" style={{ fontSize: 12, color: 'var(--ink-3)' }}>{brl(p.amount)} · {pct.toFixed(0)}%</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        ) : (
+          <div style={{ padding: '24px 0', color: 'var(--ink-3)', fontSize: 13 }}>
+            Informe a forma de pagamento ao lançar despesas para comparar débito, pix, dinheiro e crédito.
+          </div>
+        )}
+      </Card>
     </AppShell>
   );
 }

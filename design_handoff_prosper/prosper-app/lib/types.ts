@@ -31,6 +31,7 @@ export interface Transaction {
   currency: string;
   paid?: boolean;           // despesa paga?
   account_id?: string | null; // cartão vinculado (para abater limite ao pagar)
+  payment_method?: string | null; // débito | pix | dinheiro | credito
 }
 
 export interface Goal {

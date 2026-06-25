@@ -14,6 +14,7 @@ export async function addTransaction(input: {
   subtype?: string | null;  // tipo (ex.: 'Salário', 'Fatura de cartão')
   paid?: boolean;
   account_id?: string | null; // cartão vinculado
+  payment_method?: string | null;
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -31,6 +32,7 @@ export async function addTransaction(input: {
     subtype: input.subtype || null,
     paid: !!input.paid,
     account_id: input.account_id || null,
+    payment_method: isIncome ? null : (input.payment_method || null),
   });
   if (error) throw error;
   // Se já entra como paga e vinculada a um cartão, abate o limite usado.
@@ -148,7 +150,7 @@ export async function cancelRecurrence(group: string, fromDate: string) {
 export async function updateTransaction(id: string, input: {
   amount: number; name: string; category: string;
   occurred_on?: string; due_date?: string | null; subtype?: string | null;
-  paid?: boolean; account_id?: string | null;
+  paid?: boolean; account_id?: string | null; payment_method?: string | null;
 }) {
   const supabase = await createClient();
   const isIncome = input.amount > 0;
@@ -166,6 +168,7 @@ export async function updateTransaction(id: string, input: {
     subtype: input.subtype || null,
     paid: !!input.paid,
     account_id: input.account_id || null,
+    payment_method: isIncome ? null : (input.payment_method || null),
   }).eq('id', id);
   if (error) throw error;
 

@@ -61,6 +61,21 @@ export async function getCategoryBreakdown(): Promise<{ category: string; amount
   return (data ?? []) as { category: string; amount: number }[];
 }
 
+// Despesas do mês corrente agrupadas por forma de pagamento.
+export async function getPaymentBreakdown(): Promise<{ method: string; amount: number }[]> {
+  const txs = await getTransactions();
+  const now = new Date();
+  const key = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const totals: Record<string, number> = {};
+  for (const t of txs) {
+    if (t.amount >= 0) continue;
+    if (!t.occurred_on.startsWith(key)) continue;
+    const m = t.payment_method || 'outros';
+    totals[m] = (totals[m] ?? 0) + Math.abs(t.amount);
+  }
+  return Object.entries(totals).map(([method, amount]) => ({ method, amount })).sort((a, b) => b.amount - a.amount);
+}
+
 // Last 6 months income/expense series, computed from transactions.
 export async function getSixMonthSeries(): Promise<{ labels: string[]; income: number[]; expense: number[] }> {
   const txs = await getTransactions();

@@ -6,6 +6,7 @@ import { deleteTransaction, updateTransaction, addCategory, setTransactionPaid }
 import { brl, parseBRL } from '@/lib/format';
 import type { Transaction, Account } from '@/lib/types';
 import { resolveBank } from '@/lib/banks';
+import { PAYMENT_METHODS } from '@/lib/payments';
 import {
   buildCategoryMap, resolveCategory, slugify, CATEGORY_COLORS,
   DEFAULT_EXPENSE_TYPES, DEFAULT_INCOME_TYPES, type Category,
@@ -206,6 +207,7 @@ function EditTransactionModal({ t, customCategories, cards, onClose }: { t: Tran
   const [subtype, setSubtype] = useState(t.subtype ?? '');
   const [accountId, setAccountId] = useState<string>(t.account_id ?? '');
   const [paid, setPaid] = useState<boolean>(!!t.paid);
+  const [payMethod, setPayMethod] = useState<string>(t.payment_method ?? '');
   const [pending, start] = useTransition();
 
   const [localCats, setLocalCats] = useState<Category[]>(customCategories);
@@ -241,6 +243,7 @@ function EditTransactionModal({ t, customCategories, cards, onClose }: { t: Tran
         subtype: subtype.trim() || null,
         account_id: type === 'expense' ? (accountId || null) : null,
         paid: type === 'expense' ? paid : false,
+        payment_method: type === 'expense' ? (payMethod || null) : null,
       });
       onClose();
     });
@@ -326,6 +329,23 @@ function EditTransactionModal({ t, customCategories, cards, onClose }: { t: Tran
           style={{ width: '100%', padding: '10px 14px', borderRadius: 10, background: 'var(--surface-2)', border: '1px solid var(--line)', outline: 'none', fontSize: 13, color: 'var(--ink)', marginBottom: 16 }} />
 
         {/* Cartão vinculado + pago (só despesa) */}
+        {type === 'expense' && (
+          <div style={{ marginBottom: 16 }}>
+            <Eyebrow style={{ marginBottom: 8 }}>Forma de pagamento</Eyebrow>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {PAYMENT_METHODS.map((p) => (
+                <button key={p.id} type="button" onClick={() => setPayMethod(payMethod === p.id ? '' : p.id)}
+                  style={{ padding: '8px 14px', borderRadius: 999, fontSize: 13, fontWeight: 600,
+                    background: payMethod === p.id ? 'var(--accent-soft)' : 'var(--surface-2)',
+                    color: payMethod === p.id ? 'var(--ink)' : 'var(--ink-2)',
+                    border: `1px solid ${payMethod === p.id ? 'var(--accent)' : 'var(--line)'}` }}>
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {type === 'expense' && (
           <>
             <Eyebrow style={{ marginBottom: 8 }}>Cartão (opcional)</Eyebrow>

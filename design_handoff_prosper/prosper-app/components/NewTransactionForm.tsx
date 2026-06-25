@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { addTransaction, addCategory, addRecurringExpense } from '@/lib/actions';
 import { parseBRL } from '@/lib/format';
 import { resolveBank } from '@/lib/banks';
+import { PAYMENT_METHODS } from '@/lib/payments';
 import type { Account } from '@/lib/types';
 import {
   buildCategoryMap, slugify, CATEGORY_COLORS,
@@ -40,6 +41,7 @@ function Modal({ customCategories, cards, onClose }: { customCategories: Categor
   const [subtype, setSubtype] = useState('');
   const [accountId, setAccountId] = useState<string>('');
   const [paid, setPaid] = useState(false);
+  const [payMethod, setPayMethod] = useState<string>('');
   // Recorrência (conta fixa)
   const [recurring, setRecurring] = useState(false);
   const [recDay, setRecDay] = useState('5');
@@ -94,6 +96,7 @@ function Modal({ customCategories, cards, onClose }: { customCategories: Categor
           subtype: subtype.trim() || null,
           account_id: type === 'expense' ? (accountId || null) : null,
           paid: type === 'expense' ? paid : false,
+          payment_method: type === 'expense' ? (payMethod || null) : null,
         });
       }
       onClose();
@@ -183,6 +186,24 @@ function Modal({ customCategories, cards, onClose }: { customCategories: Categor
         </div>
         <input value={subtype} onChange={(e) => setSubtype(e.target.value)} placeholder="Ou crie um tipo..."
           style={{ width: '100%', padding: '10px 14px', borderRadius: 10, background: 'var(--surface-2)', border: '1px solid var(--line)', outline: 'none', fontSize: 13, color: 'var(--ink)', marginBottom: 16 }} />
+
+        {/* Forma de pagamento (só despesa) */}
+        {type === 'expense' && (
+          <div style={{ marginBottom: 16 }}>
+            <Eyebrow style={{ marginBottom: 8 }}>Forma de pagamento</Eyebrow>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {PAYMENT_METHODS.map((p) => (
+                <button key={p.id} type="button" onClick={() => setPayMethod(payMethod === p.id ? '' : p.id)}
+                  style={{ padding: '8px 14px', borderRadius: 999, fontSize: 13, fontWeight: 600,
+                    background: payMethod === p.id ? 'var(--accent-soft)' : 'var(--surface-2)',
+                    color: payMethod === p.id ? 'var(--ink)' : 'var(--ink-2)',
+                    border: `1px solid ${payMethod === p.id ? 'var(--accent)' : 'var(--line)'}` }}>
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Cartão vinculado + pago (só despesa) */}
         {type === 'expense' && (
