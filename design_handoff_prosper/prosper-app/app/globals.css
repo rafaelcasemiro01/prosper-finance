@@ -298,12 +298,16 @@ input, textarea, select { font: inherit; }
 .calc-fab {
   position: fixed; right: 22px; bottom: 26px; z-index: 60;
   width: 56px; height: 56px; border-radius: 50%;
-  background: var(--accent); color: var(--accent-ink);
+  background: color-mix(in oklab, var(--accent) 78%, transparent);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  backdrop-filter: blur(10px) saturate(160%);
+  color: var(--accent-ink);
   display: flex; align-items: center; justify-content: center;
   box-shadow: var(--shadow-2), inset 0 1px 0 var(--glass-hi);
-  border: none; transition: transform .14s ease, box-shadow .18s ease;
+  border: 1px solid color-mix(in oklab, var(--accent-ink) 14%, transparent);
+  transition: transform .14s ease, box-shadow .18s ease, background .18s ease;
 }
-.calc-fab:hover { transform: translateY(-2px) scale(1.04); }
+.calc-fab:hover { transform: translateY(-2px) scale(1.04); background: color-mix(in oklab, var(--accent) 92%, transparent); }
 .calc-fab:active { transform: scale(.96); }
 @media (max-width: 860px) { .calc-fab { bottom: 90px; right: 16px; } }
 
