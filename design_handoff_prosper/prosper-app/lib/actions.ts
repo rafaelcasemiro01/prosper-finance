@@ -79,6 +79,71 @@ export async function deleteTransaction(id: string) {
   revalidatePath('/transactions');
 }
 
+// Lança uma despesa fixa recorrente: gera uma transação por mês, no dia
+// escolhido, por `months` meses (ex.: "todo mês até cancelar" = janela longa).
+// Cada parcela compartilha um recurrence_group para poder cancelar as futuras.
+export async function addRecurringExpense(input: {
+  amount: number;       // valor positivo (será lançado como despesa)
+  name: string;
+  category: string;
+  subtype?: string | null;
+  dayOfMonth: number;   // 1..31
+  months: number;       // quantidade de meses a gerar
+  startFrom?: string;   // YYYY-MM (mês inicial); default: mês atual
+}) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Não autenticado');
+
+  const group = (globalThis.crypto?.randomUUID?.() ?? `rec-${Date.now()}`);
+  const day = Math.max(1, Math.min(31, Math.round(input.dayOfMonth)));
+  const count = Math.max(1, Math.min(60, Math.round(input.months)));
+
+  const now = new Date();
+  let baseYear = now.getFullYear();
+  let baseMonth = now.getMonth(); // 0-based
+  if (input.startFrom) {
+    const [y, m] = input.startFrom.split('-').map(Number);
+    if (y && m) { baseYear = y; baseMonth = m - 1; }
+  }
+
+  const rows = Array.from({ length: count }, (_, i) => {
+    const d = new Date(baseYear, baseMonth + i, 1);
+    const y = d.getFullYear();
+    const m = d.getMonth();
+    const lastDay = new Date(y, m + 1, 0).getDate(); // último dia do mês
+    const dd = Math.min(day, lastDay);
+    const iso = `${y}-${String(m + 1).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
+    return {
+      user_id: user.id,
+      amount: -Math.abs(input.amount),
+      name: input.name,
+      category: input.category,
+      type: 'expense' as const,
+      occurred_on: iso,
+      due_date: iso,
+      subtype: input.subtype || 'Conta fixa',
+      paid: false,
+      recurrence_group: group,
+    };
+  });
+
+  const { error } = await supabase.from('transactions').insert(rows);
+  if (error) throw error;
+  revalidatePath('/dashboard');
+  revalidatePath('/transactions');
+}
+
+// Cancela as parcelas FUTURAS de uma recorrência (mantém as já lançadas/pagas).
+export async function cancelRecurrence(group: string, fromDate: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from('transactions').delete()
+    .eq('recurrence_group', group).gte('occurred_on', fromDate).eq('paid', false);
+  if (error) throw error;
+  revalidatePath('/dashboard');
+  revalidatePath('/transactions');
+}
+
 // Edita um movimento existente (valor, nome, categoria, datas, tipo).
 export async function updateTransaction(id: string, input: {
   amount: number; name: string; category: string;

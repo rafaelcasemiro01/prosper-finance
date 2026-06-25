@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { motion } from 'framer-motion';
-import { addTransaction, addCategory } from '@/lib/actions';
+import { addTransaction, addCategory, addRecurringExpense } from '@/lib/actions';
 import { parseBRL } from '@/lib/format';
 import { resolveBank } from '@/lib/banks';
 import type { Account } from '@/lib/types';
@@ -40,6 +40,11 @@ function Modal({ customCategories, cards, onClose }: { customCategories: Categor
   const [subtype, setSubtype] = useState('');
   const [accountId, setAccountId] = useState<string>('');
   const [paid, setPaid] = useState(false);
+  // Recorrência (conta fixa)
+  const [recurring, setRecurring] = useState(false);
+  const [recDay, setRecDay] = useState('5');
+  const [recMode, setRecMode] = useState<'count' | 'forever'>('count');
+  const [recMonths, setRecMonths] = useState('12');
   const [pending, start] = useTransition();
 
   // Categorias: padrão + personalizadas (do perfil) + criação ao vivo
@@ -73,14 +78,24 @@ function Modal({ customCategories, cards, onClose }: { customCategories: Categor
     if (!canSave) return;
     const signed = type === 'income' ? num : -num;
     start(async () => {
-      await addTransaction({
-        amount: signed, name: name.trim(), category,
-        occurred_on: occurredOn || undefined,
-        due_date: type === 'expense' && hasDue ? (dueDate || null) : null,
-        subtype: subtype.trim() || null,
-        account_id: type === 'expense' ? (accountId || null) : null,
-        paid: type === 'expense' ? paid : false,
-      });
+      if (type === 'expense' && recurring) {
+        const months = recMode === 'forever' ? 24 : Math.max(1, Math.min(60, Math.round(Number(recMonths) || 1)));
+        await addRecurringExpense({
+          amount: num, name: name.trim(), category,
+          subtype: subtype.trim() || 'Conta fixa',
+          dayOfMonth: Math.max(1, Math.min(31, Math.round(Number(recDay) || 1))),
+          months,
+        });
+      } else {
+        await addTransaction({
+          amount: signed, name: name.trim(), category,
+          occurred_on: occurredOn || undefined,
+          due_date: type === 'expense' && hasDue ? (dueDate || null) : null,
+          subtype: subtype.trim() || null,
+          account_id: type === 'expense' ? (accountId || null) : null,
+          paid: type === 'expense' ? paid : false,
+        });
+      }
       onClose();
     });
   }
@@ -209,6 +224,54 @@ function Modal({ customCategories, cards, onClose }: { customCategories: Categor
                 <Eyebrow style={{ marginBottom: 8 }}>Vencimento</Eyebrow>
                 <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
                   style={{ width: '100%', padding: '11px 14px', borderRadius: 10, background: 'var(--surface-2)', border: '1px solid var(--line)', outline: 'none', fontSize: 13, color: 'var(--ink)' }} />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Conta fixa recorrente (só despesa) */}
+        {type === 'expense' && (
+          <div style={{ marginBottom: 20 }}>
+            <button type="button" onClick={() => setRecurring((v) => !v)}
+              style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: 'var(--surface-2)', border: `1px solid ${recurring ? 'var(--accent)' : 'var(--line)'}` }}>
+              <span style={{ width: 20, height: 20, borderRadius: 6, border: `1.5px solid ${recurring ? 'var(--accent)' : 'var(--ink-4)'}`, background: recurring ? 'var(--accent)' : 'transparent', color: 'var(--accent-ink)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {recurring && <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12l5 5L20 6"/></svg>}
+              </span>
+              <span style={{ flex: 1, textAlign: 'left', fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>É uma conta fixa (repetir todo mês)</span>
+            </button>
+
+            {recurring && (
+              <div style={{ marginTop: 12, padding: 14, borderRadius: 12, background: 'var(--surface-2)', border: '1px solid var(--line)' }}>
+                <Eyebrow style={{ marginBottom: 8 }}>Dia do vencimento</Eyebrow>
+                <select value={recDay} onChange={(e) => setRecDay(e.target.value)}
+                  style={{ width: '100%', padding: '11px 14px', borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--line)', outline: 'none', fontSize: 14, fontWeight: 600, color: 'var(--ink)', marginBottom: 14, cursor: 'pointer' }}>
+                  {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                    <option key={d} value={d}>Todo dia {d}</option>
+                  ))}
+                </select>
+
+                <Eyebrow style={{ marginBottom: 8 }}>Por quanto tempo</Eyebrow>
+                <div style={{ display: 'flex', gap: 8, marginBottom: recMode === 'count' ? 12 : 0 }}>
+                  <button type="button" onClick={() => setRecMode('count')}
+                    style={{ flex: 1, padding: '10px', borderRadius: 10, fontSize: 13, fontWeight: 600, background: recMode === 'count' ? 'var(--ink)' : 'var(--surface)', color: recMode === 'count' ? 'var(--bg)' : 'var(--ink-2)', border: `1px solid ${recMode === 'count' ? 'var(--ink)' : 'var(--line)'}` }}>
+                    Por X meses
+                  </button>
+                  <button type="button" onClick={() => setRecMode('forever')}
+                    style={{ flex: 1, padding: '10px', borderRadius: 10, fontSize: 13, fontWeight: 600, background: recMode === 'forever' ? 'var(--ink)' : 'var(--surface)', color: recMode === 'forever' ? 'var(--bg)' : 'var(--ink-2)', border: `1px solid ${recMode === 'forever' ? 'var(--ink)' : 'var(--line)'}` }}>
+                    Até eu cancelar
+                  </button>
+                </div>
+                {recMode === 'count' ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <input value={recMonths} onChange={(e) => setRecMonths(e.target.value.replace(/[^0-9]/g, '').slice(0, 2))} inputMode="numeric" placeholder="12"
+                      style={{ width: 80, padding: '11px 14px', borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--line)', outline: 'none', fontSize: 15, fontWeight: 600, color: 'var(--ink)', textAlign: 'center' }} />
+                    <span style={{ fontSize: 13, color: 'var(--ink-2)' }}>meses</span>
+                  </div>
+                ) : (
+                  <p style={{ fontSize: 12, color: 'var(--ink-3)', margin: '4px 0 0', lineHeight: 1.5 }}>
+                    Lançaremos 24 meses à frente. Você pode cancelar os próximos a qualquer momento na lista de movimentos.
+                  </p>
+                )}
               </div>
             )}
           </div>
