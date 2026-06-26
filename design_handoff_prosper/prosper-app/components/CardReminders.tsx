@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { brl } from '@/lib/format';
 import { resolveBank } from '@/lib/banks';
 
-interface CardInfo { id: string; bank: string; due: string; used: number }
+interface CardInfo { id: string; bank: string; due: string; used: number; limit: number }
 
 // Lembrete de vencimento de cartões: ícone de sino no dashboard.
 // Destaca cartões cujo vencimento está próximo (<= 7 dias).
@@ -75,7 +75,7 @@ export function CardReminders({ cards }: { cards: CardInfo[] }) {
                     <div style={{ width: 34, height: 34, borderRadius: 9, background: b.color, color: b.ink, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14, flexShrink: 0 }}>{b.name[0]}</div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: 13, fontWeight: 600 }}>{b.name}</div>
-                      <div style={{ fontSize: 12, color: 'var(--ink-3)' }}>Fatura {brl(c.used)}</div>
+                      <div style={{ fontSize: 12, color: 'var(--ink-3)' }}>Fatura {brl(c.used)} / {brl(c.limit)}</div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <div style={{ fontSize: 13, fontWeight: 600, color: urgent ? 'var(--negative)' : 'var(--ink)' }}>Vence dia {c.day}</div>

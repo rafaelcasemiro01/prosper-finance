@@ -1,9 +1,9 @@
 import { AppShell } from '@/components/AppShell';
 import { Card, Eyebrow, ProgressBar } from '@/components/ui';
 import { NewTransactionForm } from '@/components/NewTransactionForm';
-import { AnimatedNumber } from '@/components/AnimatedNumber';
 import { Greeting } from '@/components/Greeting';
 import { CardReminders } from '@/components/CardReminders';
+import { BalanceHero } from '@/components/BalanceHero';
 import {
   getProfile, getBalanceTotal, getMonthSummary, getGoals, getTransactions, getAccounts, getCustomCategories,
 } from '@/lib/queries';
@@ -45,32 +45,11 @@ export default async function DashboardPage() {
       </div>
 
       {/* Lembretes de vencimento de cartão */}
-      <CardReminders cards={cartoes.map((c) => ({ id: c.id, bank: c.bank, due: c.due!, used: c.used ?? 0 }))} />
+      <CardReminders cards={cartoes.map((c) => ({ id: c.id, bank: c.bank, due: c.due!, used: c.used ?? 0, limit: c.credit_limit ?? 0 }))} />
 
       <div className="grid grid-hero" style={{ marginBottom: 16 }}>
-        {/* Hero balance */}
-        <div className="card"
-          style={{
-            borderRadius: 'var(--radius-xl)', padding: 'clamp(24px, 4vw, 36px)',
-            minHeight: 200, position: 'relative', overflow: 'hidden',
-            background: 'var(--surface)', backdropFilter: 'none', WebkitBackdropFilter: 'none',
-          }}
-        >
-          <Eyebrow>Patrimônio total · BRL</Eyebrow>
-          <div className="tnum" style={{ fontSize: 'clamp(40px, 8vw, 64px)', fontWeight: 700, marginTop: 14, letterSpacing: '-0.03em', lineHeight: 1, color: 'var(--ink)' }}>
-            <AnimatedNumber value={total} />
-          </div>
-          <div
-            style={{
-              marginTop: 24, paddingTop: 18, display: 'flex', gap: 24, flexWrap: 'wrap',
-              borderTop: '1px solid var(--line)',
-            }}
-          >
-            <Stat label="Saldo atual em contas" value={brl(saldoEmContas)} />
-            <Stat label="Investido" value={brl(profile?.invested ?? 0)} />
-            <Stat label="Saldo do mês" value={brl(month.net, { sign: true })} />
-          </div>
-        </div>
+        {/* Hero balance com filtro de mês */}
+        <BalanceHero openingBalance={profile?.opening_balance ?? 0} invested={profile?.invested ?? 0} transactions={transactions} />
 
         {/* Income / expense */}
         <div className="grid" style={{ gridAutoRows: '1fr', gap: 16 }}>
