@@ -5,17 +5,15 @@ import { Greeting } from '@/components/Greeting';
 import { CardReminders } from '@/components/CardReminders';
 import { BalanceHero } from '@/components/BalanceHero';
 import {
-  getProfile, getBalanceTotal, getMonthSummary, getGoals, getTransactions, getAccounts, getCustomCategories,
+  getProfile, getGoals, getTransactions, getAccounts, getCustomCategories,
 } from '@/lib/queries';
 import { brl } from '@/lib/format';
 import { buildCategoryMap, resolveCategory } from '@/lib/categories';
 
 // Server Component — reads live, RLS-scoped data from Supabase.
 export default async function DashboardPage() {
-  const [profile, total, month, goals, transactions, accounts, customCategories] = await Promise.all([
+  const [profile, goals, transactions, accounts, customCategories] = await Promise.all([
     getProfile(),
-    getBalanceTotal(),
-    getMonthSummary(),
     getGoals(),
     getTransactions(),
     getAccounts(),
@@ -119,14 +117,5 @@ export default async function DashboardPage() {
         </Card>
       </div>
     </AppShell>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <div style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 500 }}>{label}</div>
-      <div className="tnum" style={{ fontSize: 15, fontWeight: 700, marginTop: 3, color: 'var(--ink)' }}>{value}</div>
-    </div>
   );
 }
