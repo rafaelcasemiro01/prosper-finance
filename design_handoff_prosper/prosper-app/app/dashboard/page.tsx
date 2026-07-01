@@ -4,6 +4,7 @@ import { NewTransactionForm } from '@/components/NewTransactionForm';
 import { Greeting } from '@/components/Greeting';
 import { CardReminders } from '@/components/CardReminders';
 import { BalanceHero } from '@/components/BalanceHero';
+import { AnimatedNumber } from '@/components/AnimatedNumber';
 import {
   getProfile, getGoals, getTransactions, getAccounts, getCustomCategories,
 } from '@/lib/queries';
