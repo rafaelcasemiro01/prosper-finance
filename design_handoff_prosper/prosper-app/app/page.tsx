@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { LandingPreview } from '@/components/LandingPreview';
 
 export const metadata = {
   title: 'Prosper — Sua grana no controle, sem complicação',
@@ -71,6 +72,11 @@ export default async function LandingPage() {
             Ver o que dá pra fazer
           </a>
         </div>
+      </section>
+
+      {/* Preview da plataforma */}
+      <section style={{ padding: '20px 0 30px' }}>
+        <LandingPreview />
       </section>
 
       {/* Feature grid */}
