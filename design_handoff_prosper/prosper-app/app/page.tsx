@@ -30,7 +30,7 @@ export default async function LandingPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   return (
-    <div style={{ minHeight: '100vh', minHeight: '100dvh' }}>
+    <div style={{ minHeight: '100dvh' }}>
       {/* Top nav */}
       <header style={{ position: 'sticky', top: 0, zIndex: 40, backdropFilter: 'saturate(180%) blur(14px)', WebkitBackdropFilter: 'saturate(180%) blur(14px)', background: 'color-mix(in oklab, var(--bg) 80%, transparent)', borderBottom: '1px solid var(--line-soft)' }}>
         <div style={{ maxWidth: 1120, margin: '0 auto', padding: '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
