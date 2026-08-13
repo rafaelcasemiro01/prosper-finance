@@ -203,7 +203,7 @@ input, textarea, select { font: inherit; }
 
   .mobile-topbar {
     display: flex; align-items: center; justify-content: space-between;
-    position: fixed; top: 0; left: 0; right: 0; height: 56px; z-index: 40;
+    position: fixed; top: 0; left: 0; right: 0; height: 56px; z-index: 28;
     padding: 0 16px; background: color-mix(in oklab, var(--bg) 88%, transparent);
     backdrop-filter: saturate(180%) blur(12px);
     border-bottom: 1px solid var(--line);
@@ -213,7 +213,7 @@ input, textarea, select { font: inherit; }
 
   .mobile-bottomnav {
     display: flex; position: fixed; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom));
-    transform: translateX(-50%); z-index: 50;
+    transform: translateX(-50%); z-index: 30;
     width: auto; max-width: calc(100% - 32px);
     padding: 7px 10px;
     gap: 2px;
@@ -337,31 +337,11 @@ input, textarea, select { font: inherit; }
   .tx-actions { order: 5; flex-basis: 100%; justify-content: flex-end; }
 }
 
-/* ═════════ Calculadora flutuante (FAB) ═════════ */
-.calc-fab {
-  position: fixed; right: 22px; bottom: 26px; z-index: 60;
-  width: 56px; height: 56px; border-radius: 50%;
-  background: color-mix(in oklab, var(--surface) 24%, transparent);
-  -webkit-backdrop-filter: blur(12px) saturate(160%);
-  backdrop-filter: blur(12px) saturate(160%);
-  color: var(--accent);
+/* ═════════ Badges de banco ═════════ */
+.bank-badge {
   display: flex; align-items: center; justify-content: center;
-  box-shadow: var(--shadow-1), inset 0 1px 0 var(--glass-hi);
-  border: 1px solid color-mix(in oklab, var(--accent) 38%, transparent);
-  transition: transform .14s ease, box-shadow .18s ease, background .18s ease;
+  flex-shrink: 0; border-radius: 12px;
+  font-weight: 800; letter-spacing: -.02em;
+  box-shadow: 0 2px 8px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.28);
+  border: 1px solid rgba(255,255,255,.16);
 }
-.calc-fab:hover { transform: translateY(-2px) scale(1.04); background: color-mix(in oklab, var(--accent) 16%, transparent); }
-.calc-fab:active { transform: scale(.96); }
-@media (max-width: 860px) { .calc-fab { bottom: 90px; right: 16px; } }
-
-.calc-key {
-  height: 56px; border-radius: 14px; border: 1px solid var(--line);
-  background: var(--surface-2); color: var(--ink); font-size: 20px; font-weight: 600;
-  display: flex; align-items: center; justify-content: center;
-  transition: transform .1s ease, background .15s ease;
-}
-.calc-key:hover { background: color-mix(in oklab, var(--surface-2) 70%, var(--accent)); }
-.calc-key:active { transform: scale(.95); }
-.calc-key--op { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
-.calc-key--eq { background: var(--accent); color: var(--accent-ink); }
-.calc-key--fn { background: transparent; color: var(--ink-2); font-size: 16px; }

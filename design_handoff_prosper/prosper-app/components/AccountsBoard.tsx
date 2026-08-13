@@ -10,9 +10,20 @@ import type { Account, AccountKind } from '@/lib/types';
 
 export function BankBadge({ bank, size = 44 }: { bank: string; size?: number }) {
   const b = resolveBank(bank);
+  const initials = b.name.startsWith('Banco do') ? 'BB'
+    : b.name === 'Mercado Pago' ? 'MP'
+    : b.name === 'C6 Bank' ? 'C6'
+    : b.name.slice(0, 2).toUpperCase();
   return (
-    <div style={{ width: size, height: size, borderRadius: 12, background: b.color, color: b.ink, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: size * 0.42, flexShrink: 0 }}>
-      {b.name[0]}
+    <div
+      className="bank-badge"
+      title={b.name}
+      style={{
+        width: size, height: size, color: b.ink, fontSize: size * 0.34,
+        background: `linear-gradient(145deg, ${b.color} 0%, color-mix(in oklab, ${b.color} 70%, #000) 100%)`,
+      }}
+    >
+      {initials}
     </div>
   );
 }

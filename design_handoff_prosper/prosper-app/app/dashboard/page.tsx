@@ -3,8 +3,7 @@ import { Card, Eyebrow, ProgressBar } from '@/components/ui';
 import { NewTransactionForm } from '@/components/NewTransactionForm';
 import { Greeting } from '@/components/Greeting';
 import { CardReminders } from '@/components/CardReminders';
-import { BalanceHero } from '@/components/BalanceHero';
-import { AnimatedNumber } from '@/components/AnimatedNumber';
+import { MonthOverview } from '@/components/MonthOverview';
 import {
   getProfile, getGoals, getTransactions, getAccounts, getCustomCategories,
 } from '@/lib/queries';
@@ -27,13 +26,6 @@ export default async function DashboardPage() {
   const catMap = buildCategoryMap(customCategories);
   const firstName = (profile?.full_name || 'você').split(' ')[0];
 
-  // Derivados das Contas & Cartões
-  const saldoEmContas = accounts
-    .filter((a) => a.kind === 'conta' || a.kind === 'investimento')
-    .reduce((s, a) => s + (a.balance ?? 0), 0);
-  const faturasAbertas = accounts
-    .filter((a) => a.kind === 'cartao')
-    .reduce((s, a) => s + (a.used ?? 0), 0);
   const cartoes = accounts.filter((a) => a.kind === 'cartao' && a.due);
 
   return (
@@ -46,24 +38,8 @@ export default async function DashboardPage() {
       {/* Lembretes de vencimento de cartão */}
       <CardReminders cards={cartoes.map((c) => ({ id: c.id, bank: c.bank, due: c.due!, used: c.used ?? 0, limit: c.credit_limit ?? 0 }))} />
 
-      <div className="grid grid-hero" style={{ marginBottom: 16 }}>
-        {/* Hero balance com filtro de mês */}
-        <BalanceHero openingBalance={profile?.opening_balance ?? 0} invested={profile?.invested ?? 0} transactions={transactions} />
-
-        {/* Income / expense */}
-        <div className="grid" style={{ gridAutoRows: '1fr', gap: 16 }}>
-          <Card className="card--hover dash-tile">
-            <Eyebrow style={{ color: 'var(--positive)' }}>Saldo atual · contas</Eyebrow>
-            <div className="tnum" style={{ fontSize: 'clamp(28px,5vw,34px)', fontWeight: 700, marginTop: 8 }}><AnimatedNumber value={saldoEmContas} /></div>
-            <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 4 }}>Receita disponível nas suas contas</div>
-          </Card>
-          <Card className="card--hover dash-tile">
-            <Eyebrow style={{ color: 'var(--negative)' }}>Faturas em aberto</Eyebrow>
-            <div className="tnum" style={{ fontSize: 'clamp(28px,5vw,34px)', fontWeight: 700, marginTop: 8 }}><AnimatedNumber value={faturasAbertas} /></div>
-            <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 4 }}>Despesa a pagar nos cartões</div>
-          </Card>
-        </div>
-      </div>
+      {/* Visão do mês (um seletor controla os 3 indicadores) */}
+      <MonthOverview transactions={transactions} />
 
       <div className="grid grid-split">
         {/* Featured goal */}

@@ -21,6 +21,7 @@ export default async function GoalsPage() {
       <div className="card"
         style={{
           borderRadius: 'var(--radius-xl)', padding: 'clamp(24px,4vw,36px)', marginBottom: 22,
+          background: 'var(--surface)', backdropFilter: 'none', WebkitBackdropFilter: 'none',
         }}
       >
         <Eyebrow>Progresso total</Eyebrow>

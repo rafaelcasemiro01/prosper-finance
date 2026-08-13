@@ -4,7 +4,6 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { ThemeToggle } from './ThemeToggle';
-import { Calculator } from './Calculator';
 
 // Marca
 function Logomark({ size = 28 }: { size?: number }) {
@@ -118,8 +117,6 @@ export function AppShell({
           );
         })}
       </nav>
-      {/* Calculadora flutuante (em todas as telas) */}
-      <Calculator />
     </div>
   );
 }

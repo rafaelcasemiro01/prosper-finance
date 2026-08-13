@@ -22,7 +22,11 @@ export function TransactionList({ transactions, customCategories = [], cards = [
 
   // Meses disponíveis a partir dos dados (mais recentes primeiro)
   const monthKeys = Array.from(new Set(transactions.map((t) => t.occurred_on.slice(0, 7)))).sort().reverse();
-  const [month, setMonth] = useState<string>('all');
+  const [month, setMonth] = useState<string>(() => {
+    const d = new Date();
+    const cur = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    return monthKeys.includes(cur) ? cur : (monthKeys[0] ?? 'all');
+  });
   const [kind, setKind] = useState<'all' | 'income' | 'expense'>('all');
   const [cat, setCat] = useState<string>('all');
   const [status, setStatus] = useState<'all' | 'paid' | 'pending'>('all');
@@ -65,7 +69,7 @@ export function TransactionList({ transactions, customCategories = [], cards = [
       {/* Filtros */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
         <select value={month} onChange={(e) => setMonth(e.target.value)} style={selStyle} aria-label="Período">
-          <option value="all">Todos os períodos</option>
+          <option value="all">Período total</option>
           {monthKeys.map((k) => {
             const [y, m] = k.split('-');
             return <option key={k} value={k}>{MONTHS[Number(m) - 1]} de {y}</option>;
