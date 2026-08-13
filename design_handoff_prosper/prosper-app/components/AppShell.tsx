@@ -110,9 +110,9 @@ export function AppShell({
         {bottomItems.map((n) => {
           const isActive = active === n.href;
           return (
-            <Link key={n.href} href={n.href} className={`mnav${isActive ? ' is-active' : ''}`} style={{ position: 'relative' }}>
-              <NavIcon id={n.id} />
-              <span>{n.short}</span>
+            <Link key={n.href} href={n.href} className={`mnav${isActive ? ' is-active' : ''}`}>
+              <span className="mnav__icon"><NavIcon id={n.id} /></span>
+              <span className="mnav__label">{n.short}</span>
             </Link>
           );
         })}
