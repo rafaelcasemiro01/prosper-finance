@@ -18,33 +18,30 @@ export function LandingDemo() {
   const [tab, setTab] = useState<Tab>('dashboard');
 
   return (
-    <div style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px' }}>
-      <div style={{ borderRadius: 'var(--radius-xl)', overflow: 'hidden', border: '1px solid var(--glass-border)', boxShadow: 'var(--shadow-pop)', background: 'var(--surface)' }}>
+    <div className="demo-wrap">
+      <div className="demo-shell">
         {/* Chrome bar */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '11px 16px', background: 'var(--bg-2)', borderBottom: '1px solid var(--line)' }}>
-          <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#E0735E' }} />
-          <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#E2B25C' }} />
-          <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#5FC98A' }} />
-          <div style={{ flex: 1, textAlign: 'center', fontSize: 12, color: 'var(--ink-3)' }}>app.prosper.finance/{tab}</div>
+        <div className="demo-chrome">
+          <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#E0735E', flexShrink: 0 }} />
+          <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#E2B25C', flexShrink: 0 }} />
+          <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#5FC98A', flexShrink: 0 }} />
+          <div className="demo-url">app.prosper.finance/{tab}</div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', minHeight: 400 }}>
-          {/* Sidebar navegável */}
-          <div style={{ background: 'var(--bg-2)', borderRight: '1px solid var(--line)', padding: '18px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <div style={{ padding: '0 6px 14px', fontSize: 16, fontWeight: 700, color: 'var(--accent)' }}>Prosper</div>
+        <div className="demo-body">
+          {/* Navegação (sidebar no desktop, abas no mobile) */}
+          <div className="demo-nav">
+            <div className="demo-nav__brand">Prosper</div>
             {TABS.map((t) => (
-              <button key={t.id} onClick={() => setTab(t.id)}
-                style={{ textAlign: 'left', padding: '9px 10px', borderRadius: 8, fontSize: 12.5, fontWeight: tab === t.id ? 600 : 400,
-                  background: tab === t.id ? 'var(--surface)' : 'transparent', color: tab === t.id ? 'var(--ink)' : 'var(--ink-3)',
-                  border: tab === t.id ? '1px solid var(--line)' : '1px solid transparent', cursor: 'pointer' }}>
+              <button key={t.id} onClick={() => setTab(t.id)} className={`demo-tab${tab === t.id ? ' is-on' : ''}`}>
                 {t.label}
               </button>
             ))}
-            <div style={{ marginTop: 'auto', padding: '10px 8px', fontSize: 11, color: 'var(--ink-3)' }}>👆 Clique para navegar</div>
+            <div className="demo-hint">👆 Clique para navegar</div>
           </div>
 
           {/* Conteúdo da aba */}
-          <div key={tab} className="anim-fade-up" style={{ padding: 18, background: 'var(--bg)' }}>
+          <div key={tab} className="demo-content anim-fade-up">
             {tab === 'dashboard' && <DemoDashboard />}
             {tab === 'analises' && <DemoAnalises />}
             {tab === 'metas' && <DemoMetas />}
@@ -52,8 +49,8 @@ export function LandingDemo() {
           </div>
         </div>
       </div>
-      <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--ink-3)', marginTop: 16 }}>
-        Demonstração interativa · clique nas abas para explorar. No app, tudo é real e com seus dados.
+      <p style={{ textAlign: 'center', fontSize: 12.5, color: 'var(--ink-3)', marginTop: 14, lineHeight: 1.5 }}>
+        Demonstração interativa · toque nas abas para explorar. No app, tudo é real e com seus dados.
       </p>
     </div>
   );
@@ -112,13 +109,13 @@ function Cat({ color, label, pct }: { color: string; label: string; pct: number 
 function DemoDashboard() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 12 }}>
+      <div className="demo-grid-2">
         <div style={box}>
           <div style={eyebrow}>Patrimônio total · BRL</div>
-          <div className="tnum" style={{ fontSize: 30, fontWeight: 700, marginTop: 8 }}>R$ 42.870</div>
+          <div className="tnum" style={{ fontSize: 28, fontWeight: 700, marginTop: 8 }}>R$ 42.870</div>
           <div style={{ marginTop: 12 }}><Bars /></div>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={box}>
             <div style={{ ...eyebrow, color: 'var(--positive)' }}>Saldo · contas</div>
             <div className="tnum" style={{ fontSize: 22, fontWeight: 700, marginTop: 6 }}>R$ 8.412</div>
@@ -131,7 +128,7 @@ function DemoDashboard() {
       </div>
       <div style={box}>
         <div style={eyebrow}>Gastos por categoria</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 20px', marginTop: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 18px', marginTop: 12 }}>
           <Cat color="var(--accent)" label="Moradia" pct={34} />
           <Cat color="#1F8A5B" label="Alimentação" pct={28} />
           <Cat color="#2E7D9A" label="Transporte" pct={15} />
@@ -150,7 +147,7 @@ function DemoAnalises() {
         <div className="tnum" style={{ fontSize: 28, fontWeight: 700, marginTop: 6, color: 'var(--positive)' }}>+ R$ 4.286</div>
         <div style={{ marginTop: 12 }}><Bars /></div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr', gap: 12 }}>
+      <div className="demo-grid-2">
         <div style={{ ...box, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
           <div style={{ ...eyebrow, alignSelf: 'flex-start' }}>Por categoria</div>
           <Ring pct={62} />
@@ -183,7 +180,7 @@ function DemoMetas() {
         <div style={{ fontSize: 30, fontWeight: 700, color: 'var(--accent)', marginTop: 6 }}>52%</div>
         <div style={{ fontSize: 11, color: 'var(--ink-3)' }}>R$ 41.750 de R$ 125.000 guardados</div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+      <div className="demo-grid-3">
         {goals.map((g) => (
           <div key={g.name} style={{ ...box, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
             <Ring pct={g.pct} color={g.color} size={78} />

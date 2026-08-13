@@ -34,19 +34,25 @@ export default async function LandingPage() {
     <div style={{ minHeight: '100dvh' }}>
       {/* Top nav */}
       <header style={{ position: 'sticky', top: 0, zIndex: 40, backdropFilter: 'saturate(180%) blur(14px)', WebkitBackdropFilter: 'saturate(180%) blur(14px)', background: 'color-mix(in oklab, var(--bg) 80%, transparent)', borderBottom: '1px solid var(--line-soft)' }}>
-        <div style={{ maxWidth: 1120, margin: '0 auto', padding: '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Logomark />
-            <span style={{ fontSize: 20, fontWeight: 700, color: 'var(--accent)' }}>Prosper</span>
+        <div className="lp-header-inner">
+          <div className="lp-brand">
+            <Logomark size={26} />
+            <span className="lp-brandname">Prosper</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div className="lp-actions">
             <ThemeToggle compact />
             {user ? (
-              <Link href="/dashboard" className="btn btn--primary" style={{ height: 42 }}>Ir para o app</Link>
+              <Link href="/dashboard" className="btn btn--primary">
+                <span className="lp-cta-long">Ir para o app</span>
+                <span className="lp-cta-short">Meu app</span>
+              </Link>
             ) : (
               <>
-                <Link href="/login" className="btn btn--ghost" style={{ height: 42 }}>Entrar</Link>
-                <Link href="/login" className="btn btn--primary" style={{ height: 42 }}>Criar conta grátis</Link>
+                <Link href="/login" className="btn btn--ghost">Entrar</Link>
+                <Link href="/login" className="btn btn--primary">
+                  <span className="lp-cta-long">Criar conta grátis</span>
+                  <span className="lp-cta-short">Criar conta</span>
+                </Link>
               </>
             )}
           </div>
@@ -54,40 +60,38 @@ export default async function LandingPage() {
       </header>
 
       {/* Hero */}
-      <section style={{ maxWidth: 900, margin: '0 auto', padding: 'clamp(56px, 10vw, 110px) 24px 40px', textAlign: 'center' }}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 600, color: 'var(--accent)', background: 'var(--accent-soft)', border: '1px solid color-mix(in oklab, var(--accent) 30%, transparent)', borderRadius: 999, padding: '6px 14px', marginBottom: 24 }}>
-          ✦ Explore o quanto quiser — conta é opcional
-        </span>
-        <h1 style={{ fontSize: 'clamp(38px, 7vw, 66px)', lineHeight: 1.02, fontWeight: 700, letterSpacing: '-0.03em', margin: 0 }}>
+      <section className="lp-hero">
+        <span className="lp-eyebrow">✦ Explore o quanto quiser — conta é opcional</span>
+        <h1 className="lp-title">
           Sua grana no controle,<br /><span style={{ color: 'var(--accent)' }}>sem complicação.</span>
         </h1>
-        <p style={{ fontSize: 'clamp(16px, 2.4vw, 20px)', color: 'var(--ink-2)', lineHeight: 1.55, maxWidth: 620, margin: '24px auto 0' }}>
+        <p className="lp-sub">
           Contas, cartões, metas e análises num app leve e bonito. Navegue à vontade e crie sua conta só quando quiser guardar tudo.
         </p>
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginTop: 36 }}>
-          <Link href={user ? '/dashboard' : '/login'} className="btn btn--primary" style={{ height: 54, padding: '0 30px', fontSize: 15 }}>
+        <div className="lp-hero-actions">
+          <Link href={user ? '/dashboard' : '/login'} className="btn btn--primary">
             {user ? 'Abrir meu painel' : 'Começar agora — é grátis'}
           </Link>
-          <a href="#recursos" className="btn btn--secondary" style={{ height: 54, padding: '0 26px', fontSize: 15 }}>
+          <a href="#recursos" className="btn btn--secondary">
             Ver o que dá pra fazer
           </a>
         </div>
       </section>
 
       {/* Demo interativo da plataforma */}
-      <section style={{ padding: '20px 0 30px' }}>
+      <section style={{ padding: '12px 0 24px' }}>
         <LandingDemo />
       </section>
 
       {/* Feature grid */}
-      <section id="recursos" style={{ maxWidth: 1120, margin: '0 auto', padding: '40px 24px 20px', scrollMarginTop: 80 }}>
-        <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <div className="eyebrow" style={{ justifyContent: 'center' }}>Tudo em um só lugar</div>
-          <h2 style={{ fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 700, letterSpacing: '-0.02em', margin: '8px 0 0' }}>
+      <section id="recursos" className="lp-section" style={{ scrollMarginTop: 70 }}>
+        <div style={{ textAlign: 'center', marginBottom: 30 }}>
+          <div className="eyebrow">Tudo em um só lugar</div>
+          <h2 style={{ fontSize: 'clamp(24px, 5.5vw, 40px)', fontWeight: 700, letterSpacing: '-0.02em', margin: '8px 0 0' }}>
             Feito para o seu dia a dia
           </h2>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 18 }}>
+        <div className="lp-features">
           {FEATURES.map((f) => (
             <div key={f.title} className="card card--hover">
               <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--accent-soft)', border: '1px solid color-mix(in oklab, var(--accent) 30%, transparent)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
@@ -101,22 +105,22 @@ export default async function LandingPage() {
       </section>
 
       {/* Closing CTA */}
-      <section style={{ maxWidth: 780, margin: '40px auto 0', padding: '24px' }}>
-        <div className="card" style={{ textAlign: 'center', padding: 'clamp(32px, 6vw, 56px)' }}>
-          <h2 style={{ fontSize: 'clamp(26px, 4vw, 38px)', fontWeight: 700, letterSpacing: '-0.02em', margin: 0 }}>
+      <section style={{ maxWidth: 780, margin: '32px auto 0', padding: '20px' }}>
+        <div className="card" style={{ textAlign: 'center', padding: 'clamp(26px, 6vw, 56px)' }}>
+          <h2 style={{ fontSize: 'clamp(23px, 5.5vw, 38px)', fontWeight: 700, letterSpacing: '-0.02em', margin: 0 }}>
             Pronto para prosperar?
           </h2>
-          <p style={{ fontSize: 16, color: 'var(--ink-2)', margin: '14px auto 28px', maxWidth: 460, lineHeight: 1.55 }}>
+          <p style={{ fontSize: 15, color: 'var(--ink-2)', margin: '14px auto 26px', maxWidth: 460, lineHeight: 1.55 }}>
             Leva menos de um minuto para criar sua conta. Seus dados são privados e protegidos.
           </p>
-          <Link href={user ? '/dashboard' : '/login'} className="btn btn--primary" style={{ height: 54, padding: '0 32px', fontSize: 15 }}>
+          <Link href={user ? '/dashboard' : '/login'} className="btn btn--primary" style={{ height: 52, padding: '0 28px', fontSize: 15 }}>
             {user ? 'Ir para o app' : 'Criar minha conta grátis'}
           </Link>
         </div>
       </section>
 
       {/* Footer */}
-      <footer style={{ maxWidth: 1120, margin: '0 auto', padding: '48px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', color: 'var(--ink-3)', fontSize: 13 }}>
+      <footer style={{ maxWidth: 1120, margin: '0 auto', padding: '36px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap', color: 'var(--ink-3)', fontSize: 12.5 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Logomark size={22} />
           <span style={{ fontWeight: 600, color: 'var(--ink-2)' }}>Prosper</span>
