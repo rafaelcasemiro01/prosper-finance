@@ -30,7 +30,7 @@ export default async function DashboardPage() {
 
   return (
     <AppShell active="/dashboard" width="wide">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap', margin: '0 0 28px' }}>
+      <div className="page-head">
         <Greeting name={firstName} />
         <NewTransactionForm customCategories={customCategories} cards={accounts.filter((a) => a.kind === 'cartao')} />
       </div>
